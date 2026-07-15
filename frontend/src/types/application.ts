@@ -6,6 +6,8 @@ export interface Application {
   role: string
   status: ApplicationStatus
   appliedAt: string
+  description: string | null
+  interviewDate: string | null
   createdAt: string
   updatedAt: string
 }
@@ -15,6 +17,8 @@ export interface CreateApplicationPayload {
   role: string
   status?: ApplicationStatus
   appliedAt: string
+  description?: string
+  interviewDate?: string
 }
 
 export interface UpdateApplicationPayload {
@@ -22,4 +26,6 @@ export interface UpdateApplicationPayload {
   role?: string
   status?: ApplicationStatus
   appliedAt?: string
+  description?: string
+  interviewDate?: string
 }

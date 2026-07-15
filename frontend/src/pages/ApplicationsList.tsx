@@ -1,20 +1,34 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Tag, Dropdown, Space, Modal, FloatButton, message } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, DownOutlined } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
+import { useState, useEffect, useCallback, useMemo, MouseEvent } from 'react'
+import {
+  Box, Typography,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  TableSortLabel, Paper, Button, IconButton, Menu, MenuItem,
+  Dialog, DialogTitle, DialogContent, Fab, Snackbar, Alert, Stack,
+  Badge,
+} from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
+import { PickerDay } from '@mui/x-date-pickers/PickerDay'
+import dayjs from 'dayjs'
+import { colors } from '../theme/colors'
 import { ApplicationForm } from '../components/ApplicationForm'
 import * as api from '../services/applications'
 import type { Application, CreateApplicationPayload, UpdateApplicationPayload } from '../types/application'
-import dayjs from 'dayjs'
 
-const STATUS_COLORS: Record<string, string> = {
-  applied: 'default',
-  interviewing: 'processing',
-  offer: 'success',
-  rejected: 'error',
+type StatusKey = 'applied' | 'interviewing' | 'offer' | 'rejected'
+
+const statusDotColors: Record<StatusKey, string> = {
+  applied: colors.muted,
+  interviewing: colors.primary,
+  offer: colors.success,
+  rejected: colors.danger,
 }
 
-const STATUS_LABELS: Record<string, string> = {
+const statusLabels: Record<StatusKey, string> = {
   applied: 'Applied',
   interviewing: 'Interviewing',
   offer: 'Offer',
@@ -32,12 +46,18 @@ function formatDate(date: string) {
   return dayjs(date).format('DD/MM/YYYY')
 }
 
+type SortKey = 'company' | 'role' | 'status' | 'appliedAt' | 'interviewDate'
+
 export function ApplicationsList() {
   const [apps, setApps] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<Application | null>(null)
   const [creating, setCreating] = useState(false)
-
+  const [snackbar, setSnackbar] = useState<{ message: string; severity: 'success' | 'error' } | null>(null)
+  const [sortKey, setSortKey] = useState<SortKey>('appliedAt')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [statusMenu, setStatusMenu] = useState<{ anchor: HTMLElement; app: Application } | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<Application | null>(null)
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
@@ -45,7 +65,7 @@ export function ApplicationsList() {
       const data = await api.getAll()
       setApps(data)
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Failed to load applications')
+      setSnackbar({ message: e instanceof Error ? e.message : 'Failed to load applications', severity: 'error' })
     } finally {
       setLoading(false)
     }
@@ -57,10 +77,10 @@ export function ApplicationsList() {
     try {
       await api.create(data as CreateApplicationPayload)
       setCreating(false)
-      message.success('Application created')
+      setSnackbar({ message: 'Application created', severity: 'success' })
       fetchAll()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Failed to create application')
+      setSnackbar({ message: e instanceof Error ? e.message : 'Failed to create application', severity: 'error' })
     }
   }
 
@@ -69,128 +89,216 @@ export function ApplicationsList() {
     try {
       await api.update(editing.id, data)
       setEditing(null)
-      message.success('Application updated')
+      setSnackbar({ message: 'Application updated', severity: 'success' })
       fetchAll()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Failed to update application')
+      setSnackbar({ message: e instanceof Error ? e.message : 'Failed to update application', severity: 'error' })
     }
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(app: Application) {
+    setDeleteConfirm(null)
     try {
-      await api.remove(id)
-      message.success('Application deleted')
+      await api.remove(app.id)
+      setSnackbar({ message: 'Application deleted', severity: 'success' })
       fetchAll()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Failed to delete application')
+      setSnackbar({ message: e instanceof Error ? e.message : 'Failed to delete application', severity: 'error' })
     }
   }
 
   async function handleStatusChange(id: string, newStatus: string) {
     try {
       await api.update(id, { status: newStatus as Application['status'] })
+      setStatusMenu(null)
       fetchAll()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Failed to update status')
+      setSnackbar({ message: e instanceof Error ? e.message : 'Failed to update status', severity: 'error' })
     }
   }
 
-  function showDeleteConfirm(id: string) {
-    Modal.confirm({
-      title: 'Delete application?',
-      content: 'This action cannot be undone.',
-      okText: 'Delete',
-      okType: 'danger',
-      cancelText: 'Cancel',
-      onOk: () => handleDelete(id),
-    })
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
   }
 
-  const columns: ColumnsType<Application> = [
-    { title: 'Company', dataIndex: 'company', key: 'company' },
-    { title: 'Role', dataIndex: 'role', key: 'role' },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string, record: Application) => (
-        <Dropdown
-          menu={{
-            items: STATUS_OPTIONS.map((opt) => ({
-              key: opt.value,
-              label: opt.label,
-              onClick: () => handleStatusChange(record.id, opt.value),
-            })),
-          }}
-          trigger={['click']}
-        >
-          <Tag
-            color={STATUS_COLORS[status] ?? 'default'}
-            style={{ cursor: 'pointer' }}
-          >
-            {STATUS_LABELS[status] ?? status} <DownOutlined />
-          </Tag>
-        </Dropdown>
-      ),
-    },
-    {
-      title: 'Applied',
-      dataIndex: 'appliedAt',
-      key: 'appliedAt',
-      render: (date: string) => formatDate(date),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_, record) => (
-        <Space>
-          <Button type="link" icon={<EditOutlined />} onClick={() => setEditing(record)}>
-            Edit
-          </Button>
-          <Button type="link" danger icon={<DeleteOutlined />} onClick={() => showDeleteConfirm(record.id)}>
-            Delete
-          </Button>
-        </Space>
-      ),
-    },
-  ]
+  const sorted = useMemo(() => {
+    const copy = [...apps]
+    copy.sort((a, b) => {
+      let cmp = 0
+      if (sortKey === 'appliedAt' || sortKey === 'interviewDate') {
+        const va = a[sortKey] || ''
+        const vb = b[sortKey] || ''
+        cmp = va.localeCompare(vb)
+      } else {
+        cmp = (a[sortKey] as string).localeCompare(b[sortKey] as string)
+      }
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+    return copy
+  }, [apps, sortKey, sortDir])
+
+  const interviewDateMap = useMemo(() => {
+    const map: Record<string, Application[]> = {}
+    for (const app of apps) {
+      if (app.interviewDate) {
+        const key = dayjs(app.interviewDate).format('YYYY-MM-DD')
+        if (!map[key]) map[key] = []
+        map[key].push(app)
+      }
+    }
+    return map
+  }, [apps])
+
+  function SortableHead({ label, sortKey: sk }: { label: string; sortKey: SortKey }) {
+    return (
+      <TableSortLabel active={sortKey === sk} direction={sortKey === sk ? sortDir : 'asc'} onClick={() => handleSort(sk)} sx={{ '&.Mui-active': { color: colors.primary, '& .MuiTableSortLabel-icon': { color: colors.primary } } }}>
+        {label}
+      </TableSortLabel>
+    )
+  }
+
+  function InterviewDay(props: any) {
+    const key = props.day.format('YYYY-MM-DD')
+    const hasInterview = !!interviewDateMap[key]
+    return <Badge color="error" variant="dot" invisible={!hasInterview}><PickerDay {...props} /></Badge>
+  }
 
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <h1>ApplyTrack</h1>
-        <p style={{ margin: '0.25rem 0 0', color: '#6b7280' }}>Keep track of every job you've applied to.</p>
-      </header>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.white', mb: 0.5 }}>
+        Home
+      </Typography>
+      <Typography variant="body2" sx={{ color: colors.muted, mb: 2 }}>
+        👋 Here you can manage all your job applications
+      </Typography>
+      <Box sx={{ height: '1px', bgcolor: colors.divider, mb: 3 }} />
 
-      <FloatButton
-        type="primary"
-        icon={<PlusOutlined style={{ fontSize: 24 }} />}
+      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2 }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell><SortableHead label="Company" sortKey="company" /></TableCell>
+                  <TableCell><SortableHead label="Role" sortKey="role" /></TableCell>
+                  <TableCell><SortableHead label="Status" sortKey="status" /></TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell><SortableHead label="Interview Date" sortKey="interviewDate" /></TableCell>
+                  <TableCell><SortableHead label="Applied" sortKey="appliedAt" /></TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {sorted.map((app) => (
+                  <TableRow key={app.id} hover>
+                    <TableCell sx={{ fontWeight: 500 }}>{app.company}</TableCell>
+                    <TableCell>{app.role}</TableCell>
+                    <TableCell>
+                      <Box
+                        onClick={(e: MouseEvent<HTMLElement>) => setStatusMenu({ anchor: e.currentTarget, app })}
+                        sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, cursor: 'pointer', py: 0.5 }}
+                      >
+                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: statusDotColors[app.status] ?? colors.muted, flexShrink: 0 }} />
+                        <Typography variant="body2" sx={{ color: colors.muted, fontSize: '0.85rem', lineHeight: 1 }}>
+                          {statusLabels[app.status] ?? app.status}
+                        </Typography>
+                      </Box>
+                      <Menu
+                        anchorEl={statusMenu?.anchor}
+                        open={statusMenu?.app.id === app.id}
+                        onClose={() => setStatusMenu(null)}
+                        slotProps={{ paper: { sx: { border: `1px solid ${colors.divider}`, borderRadius: 2, minWidth: 140 } } }}
+                      >
+                        {STATUS_OPTIONS.map(opt => (
+                          <MenuItem
+                            key={opt.value}
+                            selected={app.status === opt.value}
+                            onClick={() => handleStatusChange(app.id, opt.value)}
+                            sx={{ fontSize: '0.85rem', gap: 1, color: colors.white, '&.Mui-selected': { backgroundColor: 'transparent' }, '&:hover': { backgroundColor: 'transparent' } }}
+                          >
+                            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: statusDotColors[opt.value], flexShrink: 0 }} />
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Menu>
+                    </TableCell>
+                    <TableCell sx={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: colors.muted }}>
+                      {app.description ?? '-'}
+                    </TableCell>
+                    <TableCell sx={{ color: colors.muted }}>{app.interviewDate ? formatDate(app.interviewDate) : '-'}</TableCell>
+                    <TableCell sx={{ color: colors.muted }}>{formatDate(app.appliedAt)}</TableCell>
+                    <TableCell align="center">
+                      <Stack direction="row" spacing={0.5} justifyContent="center">
+                        <IconButton size="small" onClick={() => setEditing(app)}>
+                          <EditIcon sx={{ color: colors.muted }} fontSize="small" />
+                        </IconButton>
+                        <IconButton size="small" color="error" onClick={() => setDeleteConfirm(app)}>
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+
+        <Box sx={{ width: 300, flexShrink: 0, bgcolor: colors.elevation, borderRadius: 2, p: 2, position: 'sticky', top: 0 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1.5, color: 'text.primary', fontWeight: 600, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Interviews
+          </Typography>
+          <DateCalendar
+            slots={{ day: InterviewDay }}
+            readOnly
+            sx={{ width: '100%', '& .MuiDayCalendar-header': { justifyContent: 'center' } }}
+          />
+        </Box>
+      </Box>
+
+      <Fab
+        color="primary"
         onClick={() => setCreating(true)}
-        style={{ width: 60, height: 60, insetInlineEnd: 24, insetBlockEnd: 24 }}
-      />
+        sx={{ position: 'fixed', bottom: 24, right: 24, width: 60, height: 60 }}
+      >
+        <AddIcon sx={{ fontSize: 28 }} />
+      </Fab>
 
-      {creating && (
-        <section className="form-section">
-          <h2>New Application</h2>
+      <Dialog open={creating} onClose={() => setCreating(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>New Application</DialogTitle>
+        <DialogContent>
           <ApplicationForm onSave={handleCreate} onCancel={() => setCreating(false)} />
-        </section>
-      )}
+        </DialogContent>
+      </Dialog>
 
-      {editing && (
-        <section className="form-section">
-          <h2>Edit Application</h2>
-          <ApplicationForm initial={editing} onSave={handleUpdate} onCancel={() => setEditing(null)} />
-        </section>
-      )}
+      <Dialog open={!!editing} onClose={() => setEditing(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Application</DialogTitle>
+        <DialogContent>
+          {editing && <ApplicationForm initial={editing} onSave={handleUpdate} onCancel={() => setEditing(null)} />}
+        </DialogContent>
+      </Dialog>
 
-      <Table
-        columns={columns}
-        dataSource={apps}
-        rowKey="id"
-        loading={loading}
-        pagination={false}
-        locale={{ emptyText: 'No applications yet. Add your first one!' }}
-      />
-    </div>
+      <Dialog open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete application?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>This action cannot be undone.</Typography>
+          <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 2 }}>
+            <Button onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+            <Button color="error" variant="contained" onClick={() => deleteConfirm && handleDelete(deleteConfirm)}>Delete</Button>
+          </Stack>
+        </DialogContent>
+      </Dialog>
+
+      {snackbar && (
+        <Snackbar open autoHideDuration={4000} onClose={() => setSnackbar(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+          <Alert severity={snackbar.severity} onClose={() => setSnackbar(null)} variant="filled">{snackbar.message}</Alert>
+        </Snackbar>
+      )}
+    </LocalizationProvider>
   )
 }

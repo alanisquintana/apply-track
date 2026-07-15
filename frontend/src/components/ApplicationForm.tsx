@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { Form, Input, Select, DatePicker, Button, Space } from 'antd'
+import {
+  TextField, MenuItem, Button, Stack, FormControl, InputLabel, Select,
+  FormHelperText,
+} from '@mui/material'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import type { Application, CreateApplicationPayload, UpdateApplicationPayload } from '../types/application'
 
@@ -16,16 +20,77 @@ interface Props {
   onCancel: () => void
 }
 
+interface FormState {
+  company: string
+  role: string
+  status: string
+  appliedAt: dayjs.Dayjs | null
+  description: string
+  interviewDate: dayjs.Dayjs | null
+}
+
+function toDayjs(val: string | null | undefined) {
+  return val ? dayjs(val) : null
+}
+
+const emptyForm = (): FormState => ({
+  company: '',
+  role: '',
+  status: 'applied',
+  appliedAt: null,
+  description: '',
+  interviewDate: null,
+})
+
 export function ApplicationForm({ initial, onSave, onCancel }: Props) {
-  const [form] = Form.useForm()
+  const [values, setValues] = useState<FormState>(
+    initial
+      ? {
+          company: initial.company,
+          role: initial.role,
+          status: initial.status,
+          appliedAt: dayjs(initial.appliedAt),
+          description: initial.description ?? '',
+          interviewDate: toDayjs(initial.interviewDate),
+        }
+      : emptyForm(),
+  )
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
   const [saving, setSaving] = useState(false)
 
-  async function handleSubmit(values: Record<string, unknown>) {
+  function set<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setValues(prev => ({ ...prev, [key]: value }))
+    setErrors(prev => ({ ...prev, [key]: undefined }))
+  }
+
+  function validate(): boolean {
+    const errs: Partial<Record<keyof FormState, string>> = {}
+    if (!values.company.trim()) errs.company = 'Company is required'
+    if (!values.role.trim()) errs.role = 'Role is required'
+    if (!values.appliedAt) errs.appliedAt = 'Date is required'
+    if (values.interviewDate && values.appliedAt && values.interviewDate.isBefore(values.appliedAt, 'day')) {
+      errs.interviewDate = 'Interview date must be on or after the applied date'
+    }
+    setErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
+  async function handleSubmit() {
+    if (!validate()) return
     setSaving(true)
     try {
+      let status = values.status
+      const interviewDate = values.interviewDate?.format('YYYY-MM-DD')
+      if (interviewDate && status === 'applied') {
+        status = 'interviewing'
+      }
       const payload = {
-        ...values,
-        appliedAt: (values.appliedAt as dayjs.Dayjs).format('YYYY-MM-DD'),
+        company: values.company.trim(),
+        role: values.role.trim(),
+        status,
+        appliedAt: values.appliedAt!.format('YYYY-MM-DD'),
+        description: values.description.trim() || undefined,
+        interviewDate,
       }
       await onSave(payload as CreateApplicationPayload & UpdateApplicationPayload)
     } finally {
@@ -34,30 +99,76 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
   }
 
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      initialValues={initial ? { ...initial, appliedAt: dayjs(initial.appliedAt) } : { status: 'applied' }}
-      onFinish={handleSubmit}
-    >
-      <Form.Item name="company" label="Company" rules={[{ required: true, message: 'Company is required' }]}>
-        <Input />
-      </Form.Item>
-      <Form.Item name="role" label="Role" rules={[{ required: true, message: 'Role is required' }]}>
-        <Input />
-      </Form.Item>
-      <Form.Item name="status" label="Status">
-        <Select options={STATUS_OPTIONS} />
-      </Form.Item>
-      <Form.Item name="appliedAt" label="Applied date" rules={[{ required: true, message: 'Date is required' }]}>
-        <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
-      </Form.Item>
-      <Form.Item>
-        <Space>
-          <Button type="primary" htmlType="submit" loading={saving}>Save</Button>
-          <Button onClick={onCancel}>Cancel</Button>
-        </Space>
-      </Form.Item>
-    </Form>
+    <Stack spacing={2} sx={{ mt: 1 }}>
+      <TextField
+        label="Company"
+        value={values.company}
+        onChange={e => set('company', e.target.value)}
+        error={!!errors.company}
+        helperText={errors.company}
+        fullWidth
+        required
+      />
+      <TextField
+        label="Role"
+        value={values.role}
+        onChange={e => set('role', e.target.value)}
+        error={!!errors.role}
+        helperText={errors.role}
+        fullWidth
+        required
+      />
+      <FormControl fullWidth>
+        <InputLabel>Status</InputLabel>
+        <Select
+          label="Status"
+          value={values.status}
+          onChange={e => set('status', e.target.value)}
+        >
+          {STATUS_OPTIONS.map(opt => (
+            <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <DatePicker
+        label="Applied date"
+        value={values.appliedAt}
+        onChange={v => set('appliedAt', v)}
+        slotProps={{
+          textField: {
+            fullWidth: true,
+            required: true,
+            error: !!errors.appliedAt,
+            helperText: errors.appliedAt,
+          },
+        }}
+      />
+      <TextField
+        label="Description"
+        value={values.description}
+        onChange={e => set('description', e.target.value)}
+        fullWidth
+        multiline
+        rows={3}
+      />
+      <DatePicker
+        label="Interview date"
+        value={values.interviewDate}
+        onChange={v => set('interviewDate', v)}
+        slotProps={{
+          textField: {
+            fullWidth: true,
+            error: !!errors.interviewDate,
+            helperText: errors.interviewDate,
+          },
+        }}
+      />
+      <Stack direction="row" spacing={1} justifyContent="flex-end">
+        <Button onClick={onCancel}>Cancel</Button>
+        <Button variant="contained" onClick={handleSubmit} disabled={saving}>
+          {saving ? 'Saving...' : 'Save'}
+        </Button>
+      </Stack>
+    </Stack>
   )
 }

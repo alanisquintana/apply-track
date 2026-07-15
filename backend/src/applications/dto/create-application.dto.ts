@@ -17,4 +17,12 @@ export class CreateApplicationDto {
   @IsString()
   @IsNotEmpty()
   appliedAt: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsString()
+  @IsOptional()
+  interviewDate?: string;
 }

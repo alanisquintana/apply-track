@@ -61,6 +61,20 @@ Once installed, you don't need to run that command again. To use the app later:
 
 ---
 
+### Color system
+
+**All colors must be defined in `frontend/src/theme/colors.ts`.** No color value is ever hardcoded in component files or inline styles. Every color either comes from the `colors` export (for JS) or a matching `var(--...)` CSS custom property in `index.css` (for CSS).
+
+| CSS variable              | Value      | Usage                    |
+|---------------------------|------------|--------------------------|
+| `--background`            | `#0f0f23`  | Page background          |
+| `--surface`               | `#1a1a2e`  | Card/surface bg          |
+| `--text`                  | `#f5f5f5`  | All application text     |
+| `--primary`               | `#2563eb`  | Primary accent           |
+| `--danger`                | `#ff4d4f`  | Delete/danger icons      |
+
+The `theme` export references `colors.*` for all its token values, so there is only one source of truth. Status tag colors use antd preset names (`success`, `error`, `processing`, `default`) configured via the theme `token`'s `colorSuccess` and `colorError`, which reference `colors.*`. The Edit icon uses antd's default link color (`colorPrimary` = `colors.primary`), so no extra variable is needed.
+
 ## For developers
 
 The sections below are for anyone who wants to explore the code, contribute, or set things up manually instead of using the install script.

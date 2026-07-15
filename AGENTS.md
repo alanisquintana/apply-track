@@ -9,6 +9,16 @@ The default language for this project is **English**. All user-facing output, co
 - RTK's own meta-commands (`rtk gain`, `rtk init --show`, `rtk --version`) are exempt and must be used directly, without a duplicated prefix.
 - OpenCode must always be invoked with the RTK prefix instead of native commands: use `rtk opencode <command>`, never `opencode <command>` directly.
 
+## Dev Workflow
+
+### Build & Restart
+- Always kill existing processes before starting new ones: `Get-Process node | Where-Object CommandLine -match "dist/main|vite" | Stop-Process -Force`
+- Build backend once: `cd backend && npx nest build` (~100ms with SWC)
+- Start backend: `node backend/dist/main.js`
+- Start frontend: `cd frontend && npx vite --port 3000`
+- Don't use `Start-Process` or `Start-Sleep` — just run the commands directly. The processes start in ~300ms without waiting.
+- Never run `npm run dev` or `concurrently` in the Bash tool.
+
 ## Core Principles
 
 ### 1. Think Before Coding

@@ -30,6 +30,12 @@ export class Application {
   @Column({ type: 'date' })
   appliedAt: string;
 
+  @Column({ type: 'text', nullable: true })
+  description: string | null;
+
+  @Column({ type: 'date', nullable: true })
+  interviewDate: string | null;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
