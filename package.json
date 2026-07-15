@@ -1,0 +1,15 @@
+{
+  "name": "applytrack",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n api,web \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && node dist/main.js",
+    "dev:frontend": "cd frontend && npx vite --port 3000",
+    "build:backend": "cd backend && npx nest build",
+    "build": "cd backend && npx nest build && cd .. && cd frontend && npx vite build",
+    "test": "cd backend && npx jest"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}
