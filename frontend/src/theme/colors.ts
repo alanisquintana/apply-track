@@ -1,13 +1,10 @@
 export const colors = {
-  background: '#0b0d14',
-  elevation: '#171d2e',
+  background: '#192330',
+  elevation: '#232f42',
   text: '#d6dce6',
-  muted: '#5a6a8a',
-  primary: '#3b82f6',
+  muted: '#9eaac5',
+  primary: '#3B82EF',
   success: '#22c59c',
   danger: '#ef4444',
-  tableHeaderBg: '#131726',
-  tableHeaderText: '#6a7a9a',
-  white: '#ffffff',
   divider: '#3b82f61a',
 } as const

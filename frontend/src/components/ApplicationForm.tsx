@@ -27,6 +27,8 @@ interface FormState {
   appliedAt: dayjs.Dayjs | null
   description: string
   interviewDate: dayjs.Dayjs | null
+  link: string
+  appliedWhere: string
 }
 
 function toDayjs(val: string | null | undefined) {
@@ -40,6 +42,8 @@ const emptyForm = (): FormState => ({
   appliedAt: null,
   description: '',
   interviewDate: null,
+  link: '',
+  appliedWhere: '',
 })
 
 export function ApplicationForm({ initial, onSave, onCancel }: Props) {
@@ -52,6 +56,8 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
           appliedAt: dayjs(initial.appliedAt),
           description: initial.description ?? '',
           interviewDate: toDayjs(initial.interviewDate),
+          link: initial.link ?? '',
+          appliedWhere: initial.appliedWhere ?? '',
         }
       : emptyForm(),
   )
@@ -91,6 +97,8 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
         appliedAt: values.appliedAt!.format('YYYY-MM-DD'),
         description: values.description.trim() || undefined,
         interviewDate,
+        link: values.link.trim() || undefined,
+        appliedWhere: values.appliedWhere.trim() || undefined,
       }
       await onSave(payload as CreateApplicationPayload & UpdateApplicationPayload)
     } finally {
@@ -162,6 +170,20 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
             helperText: errors.interviewDate,
           },
         }}
+      />
+      <TextField
+        label="Link"
+        value={values.link}
+        onChange={e => set('link', e.target.value)}
+        fullWidth
+        placeholder="https://"
+      />
+      <TextField
+        label="Applied where"
+        value={values.appliedWhere}
+        onChange={e => set('appliedWhere', e.target.value)}
+        fullWidth
+        placeholder="e.g. LinkedIn, company website"
       />
       <Stack direction="row" spacing={1} justifyContent="flex-end">
         <Button onClick={onCancel}>Cancel</Button>

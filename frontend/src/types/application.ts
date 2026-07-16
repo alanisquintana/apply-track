@@ -8,6 +8,8 @@ export interface Application {
   appliedAt: string
   description: string | null
   interviewDate: string | null
+  link: string | null
+  appliedWhere: string | null
   createdAt: string
   updatedAt: string
 }
@@ -19,6 +21,8 @@ export interface CreateApplicationPayload {
   appliedAt: string
   description?: string
   interviewDate?: string
+  link?: string
+  appliedWhere?: string
 }
 
 export interface UpdateApplicationPayload {
@@ -28,4 +32,6 @@ export interface UpdateApplicationPayload {
   appliedAt?: string
   description?: string
   interviewDate?: string
+  link?: string
+  appliedWhere?: string
 }

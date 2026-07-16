@@ -40,8 +40,8 @@ export const muiTheme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiTableCell-head': {
-            backgroundColor: colors.tableHeaderBg,
-            color: colors.tableHeaderText,
+            backgroundColor: colors.elevation,
+            color: colors.text,
             fontWeight: 600,
             fontSize: '0.78rem',
             textTransform: 'uppercase',

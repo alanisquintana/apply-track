@@ -25,4 +25,12 @@ export class CreateApplicationDto {
   @IsString()
   @IsOptional()
   interviewDate?: string;
+
+  @IsString()
+  @IsOptional()
+  link?: string;
+
+  @IsString()
+  @IsOptional()
+  appliedWhere?: string;
 }

@@ -36,6 +36,12 @@ export class Application {
   @Column({ type: 'date', nullable: true })
   interviewDate: string | null;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  link: string | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  appliedWhere: string | null;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
