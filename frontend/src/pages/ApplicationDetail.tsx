@@ -81,7 +81,7 @@ export function ApplicationDetail() {
         <Typography variant="caption" sx={{ color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.72rem' }}>
           {label}
         </Typography>
-        <Typography sx={{ color: colors.text, mt: 0.25, wordBreak: 'break-word' }}>{value}</Typography>
+        <Typography sx={{ color: colors.text, mt: 0.25, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>{value}</Typography>
       </Box>
     )
   }
@@ -110,7 +110,7 @@ export function ApplicationDetail() {
             </Stack>
           } />
           <Field label="Applied" value={dayjs(app.appliedAt).format('DD/MM/YYYY')} />
-          {app.description && <Field label="Description" value={app.description} />}
+          {app.description && <Field label="Description" value={<span dangerouslySetInnerHTML={{ __html: app.description }} />} />}
           {app.interviewDate && <Field label="Interview Date" value={dayjs(app.interviewDate).format('DD/MM/YYYY')} />}
           {app.appliedWhere && <Field label="Applied Where" value={app.appliedWhere} />}
           {app.link && (

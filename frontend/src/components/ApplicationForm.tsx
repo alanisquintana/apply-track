@@ -1,11 +1,30 @@
 import { useState } from 'react'
 import {
-  TextField, MenuItem, Button, Stack, FormControl, InputLabel, Select,
+  Box, TextField, MenuItem, Button, Stack, FormControl, InputLabel, Select,
   FormHelperText,
 } from '@mui/material'
+import { colors } from '../theme/colors'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import ReactQuill from 'react-quill-new'
+import 'react-quill-new/dist/quill.snow.css'
 import dayjs from 'dayjs'
 import type { Application, CreateApplicationPayload, UpdateApplicationPayload } from '../types/application'
+
+const toolbar = [
+  [{ header: ['1', '2', '3', false] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  [{ color: [] }, { background: [] }],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  [{ align: [] }],
+  ['blockquote', 'code-block'],
+  ['link'],
+  ['clean'],
+]
+
+const formats = [
+  'header', 'bold', 'italic', 'underline', 'strike',
+  'color', 'background', 'list', 'align', 'blockquote', 'code-block', 'link',
+]
 
 const STATUS_OPTIONS = [
   { label: 'Applied', value: 'applied' },
@@ -95,7 +114,7 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
         role: values.role.trim(),
         status,
         appliedAt: values.appliedAt!.format('YYYY-MM-DD'),
-        description: values.description.trim() || undefined,
+        description: values.description.replace(/<[^>]*>/g, '').trim() ? values.description : undefined,
         interviewDate,
         link: values.link.trim() || undefined,
         appliedWhere: values.appliedWhere.trim() || undefined,
@@ -151,14 +170,35 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
           },
         }}
       />
-      <TextField
-        label="Description"
-        value={values.description}
-        onChange={e => set('description', e.target.value)}
-        fullWidth
-        multiline
-        rows={3}
-      />
+      <Box>
+        <InputLabel sx={{ mb: 0.5, fontSize: '0.8rem', color: colors.muted }}>Description</InputLabel>
+        <Box
+          sx={{
+            '& .ql-toolbar': { borderColor: colors.divider, borderRadius: '4px 4px 0 0', bgcolor: colors.elevation },
+            '& .ql-container': { borderColor: colors.divider, borderRadius: '0 0 4px 4px', bgcolor: colors.elevation, fontFamily: 'inherit', fontSize: '0.9rem' },
+            '& .ql-editor': { color: colors.text, minHeight: 100 },
+            '& .ql-editor.ql-blank::before': { color: colors.muted, fontStyle: 'normal' },
+            '& .ql-toolbar button .ql-stroke': { stroke: colors.text },
+            '& .ql-toolbar button .ql-fill': { fill: colors.text },
+            '& .ql-toolbar button:hover .ql-stroke, & .ql-toolbar button.ql-active .ql-stroke': { stroke: colors.primary },
+            '& .ql-toolbar button:hover .ql-fill, & .ql-toolbar button.ql-active .ql-fill': { fill: colors.primary },
+            '& .ql-toolbar .ql-picker-label': { color: colors.text },
+            '& .ql-toolbar .ql-picker-label:hover, & .ql-toolbar .ql-picker-label.ql-active': { color: colors.primary },
+            '& .ql-toolbar .ql-picker-options': { bgcolor: colors.elevation, borderColor: colors.divider, color: colors.text },
+            '& .ql-toolbar .ql-color-picker .ql-picker-options': { bgcolor: colors.elevation, borderColor: colors.divider },
+            '& .ql-toolbar .ql-background-picker .ql-picker-options': { bgcolor: colors.elevation, borderColor: colors.divider },
+          }}
+        >
+          <ReactQuill
+            value={values.description}
+            onChange={v => set('description', v)}
+            theme="snow"
+            modules={{ toolbar }}
+            formats={formats}
+            placeholder="Add notes, requirements, etc."
+          />
+        </Box>
+      </Box>
       <DatePicker
         label="Interview date"
         value={values.interviewDate}

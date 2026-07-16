@@ -194,7 +194,6 @@ export function ApplicationsList() {
                   <TableCell><SortableHead label="Company" sortKey="company" /></TableCell>
                   <TableCell><SortableHead label="Role" sortKey="role" /></TableCell>
                   <TableCell><SortableHead label="Status" sortKey="status" /></TableCell>
-                  <TableCell>Description</TableCell>
                   <TableCell>Link</TableCell>
                   <TableCell><SortableHead label="Applied Where" sortKey="appliedWhere" /></TableCell>
                   <TableCell><SortableHead label="Interview Date" sortKey="interviewDate" /></TableCell>
@@ -236,9 +235,6 @@ export function ApplicationsList() {
                           </MenuItem>
                         ))}
                       </Menu>
-                    </TableCell>
-                    <TableCell sx={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: colors.muted }}>
-                      {app.description ?? '-'}
                     </TableCell>
                     <TableCell align="center" sx={{ color: colors.muted }}>
                       {app.link ? (
