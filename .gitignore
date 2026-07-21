@@ -3,3 +3,5 @@ dist/
 .env
 *.log
 *.err
+HANDOFF-*.md
+PLAN.md
