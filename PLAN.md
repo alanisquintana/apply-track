@@ -1,8 +1,8 @@
 # Plan: ApplyTrack — Web Application
 
 **Scope:** Project plan
-**Milestones:** 5 (4 completed)
-**Tasks:** 30 (24 completed)
+**Milestones:** 5 (5 completed)
+**Tasks:** 30 (30 completed)
 
 A **web application** (React SPA + NestJS REST API + PostgreSQL) for tracking job applications. Accessed entirely through the browser at `http://localhost:3000`.
 
@@ -73,15 +73,15 @@ _Error handling, empty states, loading states, visual refinement._
 
 ---
 
-## Milestone 5 — Docker & Dev Experience
+## Milestone 5 — Docker & Dev Experience ✅
 
 _Containerization, tests, seed data, docs._
 
-25. [ ] Create `backend/Dockerfile` — multi-stage build: `node:20-alpine`, install deps, build, run with `node dist/main`
-26. [ ] Create `frontend/Dockerfile` — multi-stage build: `node:20-alpine`, build static files, serve with `nginx:alpine` (or use dev server for simplicity)
-27. [ ] Wire `docker-compose.yml` to build from Dockerfiles; set `depends_on` so backend waits for postgres and frontend waits for backend
-28. [ ] Add `make seed` script — a NestJS command or SQL script that inserts 3-5 sample applications
-29. [ ] Run `make test` — add basic NestJS e2e test for `POST /applications` (create + validate response shape)
-30. [ ] Update `README.md` — verify the existing README matches the final setup; update paths if needed
+25. [x] Create `backend/Dockerfile` — multi-stage build: `node:20-alpine`, install deps, build, run with `node dist/main`
+26. [x] Create `frontend/Dockerfile` — multi-stage build: `node:20-alpine`, build static files, serve with `nginx:alpine`
+27. [x] Wire `docker-compose.yml` to build from Dockerfiles; set `depends_on` so backend waits for postgres and frontend waits for backend
+28. [x] Add `make seed` script — a NestJS command that inserts 5 sample applications via `ts-node src/seed.ts`
+29. [x] Run `make test` — add basic NestJS e2e test for `POST /applications` (create + validate response shape)
+30. [x] Update `README.md` — verify the existing README matches the final setup; update paths if needed
 
 **Verify:** `make clean && make up` from scratch builds all images, runs migrations, and the app is fully functional at `localhost:3000`; `make test` passes; `make seed` populates sample data.

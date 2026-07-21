@@ -114,14 +114,6 @@ export function ApplicationsCards() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ fontWeight: 700, color: colors.text, mb: 0.5 }}>
-        Applications
-      </Typography>
-      <Typography variant="body2" sx={{ color: colors.text, mb: 2 }}>
-        Overview of all your job applications
-      </Typography>
-      <Box sx={{ height: '1px', bgcolor: colors.divider, mb: 3 }} />
-
       <Stack spacing={2} sx={{ mb: 3 }}>
         <TextField
           size="small"

@@ -11,11 +11,17 @@ The default language for this project is **English**. All user-facing output, co
 
 ## Dev Workflow
 
+### Quick Start (one command)
+- Run `make dev` to: ensure Docker PostgreSQL is up, build backend, and start both servers.
+- Open `http://localhost:3000` in the browser.
+
 ### Build & Restart
 - Always kill existing processes before starting new ones: `Get-Process node | Where-Object CommandLine -match "dist/main|vite" | Stop-Process -Force`
-- Build backend once: `cd backend && npx nest build` (~100ms with SWC)
+- To run everything from scratch: `make dev`
+- The `.env` file expects PostgreSQL on `localhost:5433` (Docker container `applytrack-db`). Do NOT change the DB port — use Docker for PostgreSQL.
+- Build backend: `cd backend && npx nest build` (~100ms with SWC)
 - Start backend: `node backend/dist/main.js`
-- Start frontend: `cd frontend && npx vite --port 3000`
+- Start frontend (working directory must be `frontend/`): `cd frontend && npx vite --port 3000`
 - Don't use `Start-Process` or `Start-Sleep` — just run the commands directly. The processes start in ~300ms without waiting.
 - Never run `npm run dev` or `concurrently` in the Bash tool.
 

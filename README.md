@@ -88,11 +88,17 @@ cp .env.example .env
 make up
 ```
 
-This builds the frontend, backend, and database images, starts everything with Docker Compose, and runs database migrations automatically.
+This builds the frontend, backend, and database images (using the multi-stage Dockerfiles), starts everything with Docker Compose, and runs database migrations automatically.
 
 - Frontend (web UI): http://localhost:3000
 - Backend API: http://localhost:3001
-- PostgreSQL: `localhost:5432`
+- PostgreSQL: `localhost:5433`
+
+To seed the database with sample data after starting:
+
+```bash
+make seed
+```
 
 ### Available Make commands
 
@@ -105,17 +111,22 @@ This builds the frontend, backend, and database images, starts everything with D
 | `make migrate`    | Run database migrations manually                 |
 | `make seed`       | Seed the database with sample data                |
 | `make clean`      | Stop services and remove volumes (resets the DB)  |
-| `make test`       | Run backend and frontend test suites              |
+| `make seed`       | Seed the database with sample data (5 applications)|
+| `make test`       | Run backend e2e tests                              |
 
 ### Project structure
 
 ```
 applytrack/
-├── frontend/           # React + TypeScript SPA (Single Page Application)
-├── backend/            # NestJS REST API
-├── docker-compose.yml  # Service orchestration
-├── Makefile             # Command shortcuts
-├── .env.example         # Environment variable template
+├── frontend/             # React + TypeScript SPA
+│   ├── Dockerfile        # Multi-stage build (nginx)
+│   └── nginx.conf        # Reverse proxy config for SPA + /api
+├── backend/              # NestJS REST API
+│   ├── Dockerfile        # Multi-stage build (node:20-alpine)
+│   └── src/seed.ts       # Database seed script
+├── docker-compose.yml    # Service orchestration
+├── Makefile              # Command shortcuts
+├── .env.example          # Environment variable template
 └── README.md
 ```
 
@@ -126,7 +137,7 @@ applytrack/
 | `POSTGRES_USER`        | Database username                    | `applytrack`   |
 | `POSTGRES_PASSWORD`    | Database password                    | `applytrack`   |
 | `POSTGRES_DB`           | Database name                        | `applytrack`   |
-| `DATABASE_URL`          | Full connection string for the API   | auto-generated |
+| `DATABASE_URL`          | Full connection string for the API   | auto-generated (uses `postgres:5432` inside Docker, `localhost:5433` from host) |
 | `API_PORT`              | Port for the backend API             | `3001`         |
 | `FRONTEND_PORT`         | Port for the frontend                | `3000`         |
 

@@ -1,33 +1,70 @@
-import { useState } from 'react'
-import { type ReactNode } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react'
 import {
-  Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
-  Typography, Fab, Dialog, DialogTitle, DialogContent, Snackbar, Alert,
+  Box, Typography, Fab, Dialog, DialogTitle, DialogContent, Snackbar, Alert,
+  IconButton, Popover, Stack, Badge,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import HomeIcon from '@mui/icons-material/Home'
-import DashboardIcon from '@mui/icons-material/Dashboard'
 import TrackChangesIcon from '@mui/icons-material/TrackChanges'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
+import { PickerDay } from '@mui/x-date-pickers/PickerDay'
+import dayjs from 'dayjs'
 import { colors } from '../theme/colors'
 import { ApplicationForm } from './ApplicationForm'
 import { useRefresh } from '../hooks/useRefresh'
 import * as api from '../services/applications'
-import type { CreateApplicationPayload, UpdateApplicationPayload } from '../types/application'
+import type { Application, CreateApplicationPayload, UpdateApplicationPayload } from '../types/application'
 
-const DRAWER_WIDTH = 200
-
-const NAV = [
-  { label: 'Home', icon: <HomeIcon />, path: '/', match: (p: string) => p === '/' },
-  { label: 'Applications', icon: <DashboardIcon />, path: '/applications', match: (p: string) => p.startsWith('/applications') },
-]
+const statusDotColors: Record<string, string> = {
+  applied: colors.muted,
+  interviewing: colors.primary,
+  offer: colors.success,
+  rejected: colors.danger,
+}
 
 export function Layout({ children }: { children: ReactNode }) {
-  const location = useLocation()
-  const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
   const { refresh } = useRefresh()
   const [snackbar, setSnackbar] = useState<{ message: string; severity: 'success' | 'error' } | null>(null)
+
+  const [apps, setApps] = useState<Application[]>([])
+  const fetchApps = useCallback(async () => {
+    try {
+      setApps(await api.getAll())
+    } catch { /* calendar silently fails */ }
+  }, [])
+  useEffect(() => { fetchApps() }, [fetchApps])
+
+  const [calAnchor, setCalAnchor] = useState<HTMLElement | null>(null)
+  const calOpen = Boolean(calAnchor)
+  const handleCalClick = (e: React.MouseEvent<HTMLElement>) => setCalAnchor(e.currentTarget)
+  const handleCalClose = () => setCalAnchor(null)
+
+  const interviewDateMap = useMemo(() => {
+    const map: Record<string, Application[]> = {}
+    for (const app of apps) {
+      if (app.interviewDate) {
+        const key = dayjs(app.interviewDate).format('YYYY-MM-DD')
+        if (!map[key]) map[key] = []
+        map[key].push(app)
+      }
+    }
+    return map
+  }, [apps])
+
+  const upcomingInterviews = useMemo(() => {
+    const today = dayjs().startOf('day')
+    return apps
+      .filter(app => app.interviewDate && dayjs(app.interviewDate).startOf('day').diff(today, 'day') >= 0)
+      .sort((a, b) => dayjs(a.interviewDate).unix() - dayjs(b.interviewDate).unix())
+      .slice(0, 5)
+  }, [apps])
+
+  function InterviewDay(props: any) {
+    const key = props.day.format('YYYY-MM-DD')
+    const hasInterview = !!interviewDateMap[key]
+    return <Badge color="error" variant="dot" invisible={!hasInterview}><PickerDay {...props} /></Badge>
+  }
 
   async function handleCreate(data: CreateApplicationPayload | UpdateApplicationPayload) {
     try {
@@ -35,80 +72,70 @@ export function Layout({ children }: { children: ReactNode }) {
       setCreating(false)
       setSnackbar({ message: 'Application created', severity: 'success' })
       refresh()
+      fetchApps()
     } catch (e) {
       setSnackbar({ message: e instanceof Error ? e.message : 'Failed to create application', severity: 'error' })
     }
   }
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: colors.background }}>
-      {/* sidebar */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: DRAWER_WIDTH,
-            boxSizing: 'border-box',
-            bgcolor: colors.elevation,
-            position: 'relative',
-          },
-        }}
-      >
-        <Box sx={{ px: 2, pt: 2.5, pb: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <TrackChangesIcon sx={{ color: colors.primary, fontSize: 20 }} />
-          <Typography variant="h6" noWrap sx={{ color: colors.text, fontSize: '1rem', letterSpacing: '-0.02em' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: colors.background }}>
+      <Box component="main" sx={{ flex: 1, p: 4, overflow: 'auto', minWidth: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 5 }}>
+          <TrackChangesIcon sx={{ color: colors.primary, fontSize: 20, mr: 1.5 }} />
+          <Typography variant="h6" noWrap sx={{ color: colors.text, fontSize: '1rem', letterSpacing: '-0.02em', fontWeight: 600 }}>
             ApplyTrack
           </Typography>
+          <Box sx={{ flex: 1 }} />
+          <IconButton onClick={handleCalClick} sx={{ color: colors.muted }}>
+            <CalendarMonthIcon />
+          </IconButton>
         </Box>
-        <Box sx={{ mx: 1.5, mb: 1, height: '1px', bgcolor: colors.divider }} />
-        <List sx={{ px: 1 }}>
-          {NAV.map(item => {
-            const active = item.match(location.pathname)
-            return (
-              <ListItem key={item.path} disablePadding sx={{ mb: 0.25 }}>
-                <ListItemButton
-                  selected={active}
-                  onClick={() => navigate(item.path)}
-                  sx={{
-                    borderRadius: 1.5,
-                    py: 0.8,
-                    backgroundColor: 'transparent',
-                    '&.Mui-selected': { backgroundColor: 'transparent' },
-                    '&:hover': {
-                      backgroundColor: `${colors.background} !important`,
-                      '& .MuiListItemIcon-root': { color: colors.primary },
-                      '& .MuiListItemText-primary': { color: colors.primary },
-                    },
-                    '&.Mui-selected:hover': {
-                      backgroundColor: `${colors.background} !important`,
-                      '& .MuiListItemIcon-root': { color: colors.primary },
-                      '& .MuiListItemText-primary': { color: colors.primary },
-                    },
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 36, color: colors.muted }}>
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={item.label}
-                    sx={{ '& .MuiListItemText-primary': { fontSize: '0.88rem', color: colors.muted } }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            )
-          })}
-        </List>
-      </Drawer>
-
-      {/* color divider between sidebar and content */}
-      <Box sx={{ width: '1px', bgcolor: colors.divider, flexShrink: 0 }} />
-
-      {/* main content */}
-      <Box component="main" sx={{ flex: 1, p: 8, overflow: 'auto', minWidth: 0 }}>
         {children}
       </Box>
+
+      <Popover
+        open={calOpen}
+        anchorEl={calAnchor}
+        onClose={handleCalClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{ paper: { sx: { bgcolor: colors.elevation, borderRadius: 2, p: 2, border: `1px solid ${colors.divider}`, width: 320 } } }}
+      >
+        <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.primary', fontWeight: 600, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Interviews
+        </Typography>
+        <DateCalendar
+          slots={{ day: InterviewDay }}
+          readOnly
+          sx={{ width: '100%', '& .MuiDayCalendar-header': { justifyContent: 'center' }, '& .MuiPickersCalendarHeader-root': { mb: 0.5 } }}
+        />
+        {upcomingInterviews.length > 0 && (
+          <Box sx={{ mt: 0.5 }}>
+            <Typography variant="caption" sx={{ color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.7rem', mb: 1, display: 'block' }}>
+              Upcoming
+            </Typography>
+            <Stack spacing={0.5}>
+              {upcomingInterviews.map(app => (
+                <Box
+                  key={app.id}
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'default', p: 0.5, borderRadius: 1 }}
+                >
+                  <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: statusDotColors[app.status] ?? colors.muted, flexShrink: 0 }} />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="body2" sx={{ color: colors.text, fontSize: '0.78rem', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {app.company} - {app.role}
+                    </Typography>
+                  </Box>
+                  <Typography variant="caption" sx={{ color: colors.muted, fontSize: '0.7rem', flexShrink: 0 }}>
+                    {dayjs(app.interviewDate).format('DD/MM')}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+          </Box>
+        )}
+      </Popover>
 
       <Fab
         color="primary"

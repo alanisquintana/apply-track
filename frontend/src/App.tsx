@@ -5,7 +5,6 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import 'dayjs/locale/pt-br'
 import { Layout } from './components/Layout'
-import { ApplicationsList } from './pages/ApplicationsList'
 import { ApplicationDetail } from './pages/ApplicationDetail'
 import { ApplicationsCards } from './pages/ApplicationsCards'
 import { RefreshContext } from './hooks/useRefresh'
@@ -20,8 +19,7 @@ function App() {
         <RefreshContext value={{ refresh, version: n }}>
           <Layout>
             <Routes>
-              <Route path="/" element={<ApplicationsList />} />
-              <Route path="/applications" element={<ApplicationsCards />} />
+              <Route path="/" element={<ApplicationsCards />} />
               <Route path="/applications/:id" element={<ApplicationDetail />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

@@ -1,7 +1,7 @@
-.PHONY: up down restart logs migrate seed clean test
+.PHONY: up down restart logs migrate seed clean test dev
 
 up:
-	docker compose up -d
+	docker compose up -d --build
 
 down:
 	docker compose down
@@ -21,4 +21,10 @@ clean:
 	docker compose down -v
 
 test:
-	cd backend && npm test
+	cd backend && npm run test:e2e
+
+dev:
+	docker compose up -d postgres
+	cd backend && npx nest build
+	start /B node backend/dist/main.js
+	start /B node frontend/node_modules/vite/bin/vite.js --port 3000
