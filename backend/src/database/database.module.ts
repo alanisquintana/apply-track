@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Application } from '../applications/application.entity';
@@ -6,8 +7,8 @@ import { Application } from '../applications/application.entity';
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
-        type: 'postgres',
-        url: process.env.DATABASE_URL ?? 'postgresql://applytrack:applytrack@localhost:5432/applytrack',
+        type: 'better-sqlite3',
+        database: resolve(__dirname, '..', '..', 'data', 'applytrack.db'),
         entities: [Application],
         synchronize: true,
       }),

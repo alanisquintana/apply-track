@@ -24,7 +24,7 @@ export class Application {
   @Column({ type: 'varchar', length: 255 })
   role: string;
 
-  @Column({ type: 'enum', enum: ApplicationStatus, default: ApplicationStatus.Applied })
+  @Column({ type: 'varchar', default: ApplicationStatus.Applied })
   status: ApplicationStatus;
 
   @Column({ type: 'date' })
@@ -48,9 +48,9 @@ export class Application {
   @Column({ type: 'varchar', length: 255, nullable: true })
   appliedWhere: string | null;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn()
   updatedAt: Date;
 }

@@ -5,3 +5,4 @@ dist/
 *.err
 HANDOFF-*.md
 PLAN.md
+backend/data/

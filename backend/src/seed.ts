@@ -6,8 +6,8 @@ import { DataSource } from 'typeorm';
 import { Application, ApplicationStatus } from './applications/application.entity';
 
 const AppDataSource = new DataSource({
-  type: 'postgres',
-  url: process.env.DATABASE_URL ?? 'postgresql://applytrack:applytrack@localhost:5432/applytrack',
+  type: 'better-sqlite3',
+  database: resolve(__dirname, '..', 'data', 'applytrack.db'),
   entities: [Application],
   synchronize: true,
 });

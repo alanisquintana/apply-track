@@ -7,21 +7,15 @@ INSTALL_DIR="$HOME/applytrack"
 echo "Installing ApplyTrack..."
 echo ""
 
-# Check Docker
-if ! command -v docker &> /dev/null; then
-  echo "Docker not found. Please install Docker first: https://docs.docker.com/get-docker/"
+# Check Node.js
+if ! command -v node &> /dev/null; then
+  echo "Node.js not found. Please install Node.js 20+ first: https://nodejs.org/"
   exit 1
 fi
 
-# Check Docker Compose
-if ! docker compose version &> /dev/null; then
-  echo "Docker Compose not found. Please update Docker to a version that includes Compose."
-  exit 1
-fi
-
-# Check Make
-if ! command -v make &> /dev/null; then
-  echo "Make not found. Please install it (usually pre-installed on macOS/Linux; on Windows use WSL)."
+NODE_VERSION=$(node -v | sed 's/v//' | cut -d. -f1)
+if [ "$NODE_VERSION" -lt 20 ]; then
+  echo "Node.js 20+ is required. Current version: $(node -v)"
   exit 1
 fi
 
@@ -50,7 +44,7 @@ fi
 # Run
 echo ""
 echo "Starting ApplyTrack..."
-make up
+node start.js
 
 echo ""
 echo "ApplyTrack is running!"

@@ -1,5 +1,3 @@
-`React` `TypeScript` `NestJS` `PostgreSQL` `Docker`
-
 # ApplyTrack
 
 A **web application** to keep track of every job you've applied to — company, status, and dates — all in one simple place.
@@ -15,69 +13,40 @@ No spreadsheets, no sticky notes. Just a clean list of your applications that yo
 
 ## Before you start
 
-You don't need to know how to code to run this app. You just need three free programs installed on your computer:
+You need one program installed:
 
-1. **[Docker](https://docs.docker.com/get-docker/)** — this is what runs the app for you, without you needing to install anything else (no need to set up databases or servers by hand). Download it, install it like any other program, and open it once so it's running in the background.
-2. **[Git](https://git-scm.com/downloads)** — this is what downloads the project files to your computer.
-3. **Make** — a small tool used to run the setup command. It already comes installed on Mac and Linux. On Windows, the easiest way is to install [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) first (Windows Subsystem for Linux), which gives you a Mac/Linux-like terminal.
+1. **[Node.js](https://nodejs.org/)** 20 or newer
 
-That's it — you do **not** need to install Node.js, PostgreSQL, or anything else. Docker takes care of all of that for you.
+That's it. You do **not** need Docker, PostgreSQL, or anything else.
 
 ## How to install and run it
 
-Open your computer's terminal (on Mac: search for "Terminal"; on Windows: open the WSL terminal you installed above) and paste this single command:
+Open your computer's terminal and paste:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AlanisQuintana/applytrack/main/install.sh | bash
+git clone https://github.com/AlanisQuintana/applytrack.git
+cd applytrack
+node start.js
 ```
 
-Press Enter and wait. This one line will:
+This will install dependencies, build the backend, and start both servers.
 
-1. Check that Docker, Git, and Make are installed
-2. Download the app to a folder called `applytrack` in your home directory
-3. Set everything up and start the app automatically
-
-When it's done, you'll see a message saying it's running. Open your browser and go to:
-
-👉 **http://localhost:3000**
-
-That's the app — you can start adding your job applications right away.
-
-> Curious what the install command actually does before running it? You can read it here: [install.sh](install.sh). It doesn't do anything hidden — just checks your setup and starts the app.
+Open **http://localhost:3000** in your browser — the app is ready.
 
 ## Everyday use
 
-Once installed, you don't need to run that command again. To use the app later:
-
-- **Start the app**: open a terminal, go to the folder (`cd ~/applytrack`), and run `make up`
-- **Stop the app**: run `make down` in that same folder
-- Your data is saved automatically and will still be there the next time you start it up
+- **Start the app**: go to the folder and run `node start.js`
+- **Your data is saved automatically** in a local SQLite file — it will be there next time you start the app
 
 ## Something not working?
 
-- Make sure Docker is open and running in the background before starting the app
-- If a port is "already in use", another program on your computer might be using it — check `.env` to change the port
-- Still stuck? Open an [issue](../../issues) describing what happened and we'll help out
+- Make sure Node.js 20+ is installed (`node -v`)
+- If a port is already in use, change `API_PORT` in `.env`
+- Still stuck? Open an [issue](../../issues) describing what happened
 
 ---
 
-### Color system
-
-**All colors must be defined in `frontend/src/theme/colors.ts`.** No color value is ever hardcoded in component files or inline styles. Every color either comes from the `colors` export (for JS) or a matching `var(--...)` CSS custom property in `index.css` (for CSS).
-
-| CSS variable              | Value      | Usage                    |
-|---------------------------|------------|--------------------------|
-| `--background`            | `#0f0f23`  | Page background          |
-| `--surface`               | `#1a1a2e`  | Card/surface bg          |
-| `--text`                  | `#f5f5f5`  | All application text     |
-| `--primary`               | `#2563eb`  | Primary accent           |
-| `--danger`                | `#ff4d4f`  | Delete/danger icons      |
-
-The `theme` export references `colors.*` for all its token values, so there is only one source of truth. Status tag colors use antd preset names (`success`, `error`, `processing`, `default`) configured via the theme `token`'s `colorSuccess` and `colorError`, which reference `colors.*`. The Edit icon uses antd's default link color (`colorPrimary` = `colors.primary`), so no extra variable is needed.
-
 ## For developers
-
-The sections below are for anyone who wants to explore the code, contribute, or set things up manually instead of using the install script.
 
 ### Manual setup
 
@@ -85,14 +54,12 @@ The sections below are for anyone who wants to explore the code, contribute, or 
 git clone https://github.com/AlanisQuintana/applytrack.git
 cd applytrack
 cp .env.example .env
-make up
+node start.js
 ```
-
-This builds the frontend, backend, and database images (using the multi-stage Dockerfiles), starts everything with Docker Compose, and runs database migrations automatically.
 
 - Frontend (web UI): http://localhost:3000
 - Backend API: http://localhost:3001
-- PostgreSQL: `localhost:5433`
+- Database: SQLite at `backend/data/applytrack.db`
 
 To seed the database with sample data after starting:
 
@@ -100,58 +67,60 @@ To seed the database with sample data after starting:
 make seed
 ```
 
-### Available Make commands
+### Available commands
 
-| Command          | Description                                      |
-|-------------------|--------------------------------------------------|
-| `make up`         | Build and start all services                     |
-| `make down`       | Stop all services                                 |
-| `make restart`    | Restart all services                              |
-| `make logs`       | Tail logs from all containers                     |
-| `make migrate`    | Run database migrations manually                 |
-| `make seed`       | Seed the database with sample data                |
-| `make clean`      | Stop services and remove volumes (resets the DB)  |
-| `make seed`       | Seed the database with sample data (5 applications)|
-| `make test`       | Run backend e2e tests                              |
+| Command      | Description                                     |
+|-------------|-------------------------------------------------|
+| `node start.js` | Build and start both servers                 |
+| `make seed`    | Seed the database with sample data (5 applications) |
+| `make test`    | Run backend e2e tests                         |
 
 ### Project structure
 
 ```
 applytrack/
 ├── frontend/             # React + TypeScript SPA
-│   ├── Dockerfile        # Multi-stage build (nginx)
-│   └── nginx.conf        # Reverse proxy config for SPA + /api
 ├── backend/              # NestJS REST API
-│   ├── Dockerfile        # Multi-stage build (node:20-alpine)
-│   └── src/seed.ts       # Database seed script
-├── docker-compose.yml    # Service orchestration
-├── Makefile              # Command shortcuts
-├── .env.example          # Environment variable template
+│   ├── src/
+│   │   ├── applications/  # CRUD module
+│   │   ├── database/      # SQLite configuration
+│   │   └── seed.ts        # Database seed script
+│   └── data/              # SQLite database file (gitignored)
+├── .env.example           # Environment variable template
+├── start.js               # Single-command launcher
+├── Makefile               # Command shortcuts
 └── README.md
 ```
 
 ### Environment variables
 
-| Variable            | Description                          | Default        |
-|-----------------------|----------------------------------------|----------------|
-| `POSTGRES_USER`        | Database username                    | `applytrack`   |
-| `POSTGRES_PASSWORD`    | Database password                    | `applytrack`   |
-| `POSTGRES_DB`           | Database name                        | `applytrack`   |
-| `DATABASE_URL`          | Full connection string for the API   | auto-generated (uses `postgres:5432` inside Docker, `localhost:5433` from host) |
-| `API_PORT`              | Port for the backend API             | `3001`         |
-| `FRONTEND_PORT`         | Port for the frontend                | `3000`         |
+| Variable    | Description           | Default  |
+|-------------|-----------------------|----------|
+| `API_PORT`  | Port for the backend  | `3001`   |
 
 See `.env.example` for the full list.
 
 ### API overview
 
 | Method | Endpoint            | Description                  |
-|--------|----------------------|-------------------------------|
+|--------|----------------------|------------------------------|
 | GET    | `/applications`      | List all applications         |
 | GET    | `/applications/:id`  | Get a single application      |
 | POST   | `/applications`      | Create a new application      |
 | PATCH  | `/applications/:id`  | Update an application         |
 | DELETE | `/applications/:id`  | Delete an application         |
+
+### Color system
+
+All colors are defined in `frontend/src/theme/colors.ts`. No color value is hardcoded in component files or inline styles. Every color either comes from the `colors` export (for JS) or a matching `var(--...)` CSS custom property in `index.css` (for CSS).
+
+| CSS variable   | Value      | Usage                 |
+|----------------|------------|-----------------------|
+| `--background` | `#0f0f23`  | Page background       |
+| `--surface`    | `#1a1a2e`  | Card/surface bg       |
+| `--text`       | `#f5f5f5`  | All application text  |
+| `--primary`    | `#2563eb`  | Primary accent        |
+| `--danger`     | `#ff4d4f`  | Delete/danger icons   |
 
 ### Contributing
 

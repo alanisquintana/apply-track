@@ -12,14 +12,14 @@ The default language for this project is **English**. All user-facing output, co
 ## Dev Workflow
 
 ### Quick Start (one command)
-- Run `make up` to build and start all services via Docker.
+- Run `make up` to build and start all services (SQLite — no Docker needed).
 - Open `http://localhost:3000` in the browser.
+- **Only requires Node.js 20+**
 
 ### Build & Restart
 - Always kill existing processes before starting new ones: `Get-Process node | Where-Object CommandLine -match "dist/main|vite" | Stop-Process -Force`
-- To run everything from scratch with Docker: `make up`
-- For local native dev: `docker compose up -d postgres` then build backend + start backend and frontend manually.
-- The `.env` file expects PostgreSQL on `localhost:5433` (Docker container `applytrack-db`). Do NOT change the DB port — use Docker for PostgreSQL.
+- To run everything from scratch: `make up` or `node start.js`
+- The database is SQLite stored at `backend/data/applytrack.db` — no external server needed.
 - Build backend: `cd backend && npx nest build` (~100ms with SWC)
 - Start backend: `node backend/dist/main.js`
 - Start frontend (working directory must be `frontend/`): `cd frontend && npx vite --port 3000`
