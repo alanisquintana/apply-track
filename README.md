@@ -1,8 +1,8 @@
 # ApplyTrack
 
-A **web application** to keep track of every job you've applied to — company, status, and dates — all in one simple place.
+A **desktop application** to keep track of every job you've applied to — company, status, and dates — all in one simple place.
 
-No spreadsheets, no sticky notes. Just a clean list of your applications that you run in your browser on your own machine.
+No spreadsheets, no sticky notes. Just a clean local app that runs on your machine.
 
 ## What can it do?
 
@@ -11,17 +11,25 @@ No spreadsheets, no sticky notes. Just a clean list of your applications that yo
 - Edit or delete any application
 - Runs entirely on your own machine — your data stays with you
 
-## Before you start
+## Download
 
-You need one program installed:
+Download the latest installer for Windows from the [Releases](https://github.com/alanisquintana/apply-track/releases) page:
 
-1. **[Node.js](https://nodejs.org/)** 20 or newer
+| Format | File |
+|--------|------|
+| MSI Installer | `ApplyTrack_x64_en-US.msi` |
+| NSIS Installer | `ApplyTrack_x64-setup.exe` |
 
-That's it. You do **not** need Docker, PostgreSQL, or anything else.
+Run the installer and the app is ready — no dependencies required.
 
-## How to install and run it
+## For developers
 
-Open your computer's terminal and paste:
+### Requirements
+
+- **Node.js** 20 or newer
+- **Rust** (latest stable) — only needed to build the Tauri desktop app
+
+### Quick start (browser dev mode)
 
 ```bash
 git clone https://github.com/alanisquintana/apply-track.git
@@ -29,24 +37,25 @@ cd applytrack
 node start.js
 ```
 
-This will install dependencies, build the backend, and start both servers.
+Open **http://localhost:3000** in your browser.
 
-Open **http://localhost:3000** in your browser — the app is ready.
+### Desktop dev mode
 
-## Everyday use
+```bash
+cd frontend
+npm run tauri:dev
+```
 
-- **Start the app**: go to the folder and run `node start.js`
-- **Your data is saved automatically** in a local SQLite file — it will be there next time you start the app
+This builds the backend executable, starts the Vite dev server, and opens the Tauri desktop window connected to it.
 
-## Something not working?
+### Build the desktop installer
 
-- Make sure Node.js 20+ is installed (`node -v`)
-- If a port is already in use, change `API_PORT` in `.env`
-- Still stuck? Open an [issue](../../issues) describing what happened
+```bash
+cd frontend
+npm run tauri:build
+```
 
----
-
-## For developers
+Output is in `frontend/src-tauri/target/release/bundle/`.
 
 ### Manual setup
 
@@ -69,25 +78,32 @@ make seed
 
 ### Available commands
 
-| Command      | Description                                     |
-|-------------|-------------------------------------------------|
-| `node start.js` | Build and start both servers                 |
-| `make seed`    | Seed the database with sample data (5 applications) |
-| `make test`    | Run backend e2e tests                         |
+| Command                 | Description                                     |
+|------------------------|-------------------------------------------------|
+| `node start.js`        | Build and start both servers (browser mode)     |
+| `make tauri-dev`       | Launch desktop app in dev mode                  |
+| `make tauri-build`     | Build desktop installer                         |
+| `make seed`            | Seed the database with sample data (5 apps)     |
+| `make test`            | Run backend e2e tests                         |
 
 ### Project structure
 
 ```
 applytrack/
 ├── frontend/             # React + TypeScript SPA
+│   └── src-tauri/        # Tauri Rust shell + config
+│       ├── src/lib.rs    # Backend sidecar launcher
+│       ├── binaries/     # Backend SEA executable
+│       └── tauri.conf.json
 ├── backend/              # NestJS REST API
 │   ├── src/
 │   │   ├── applications/  # CRUD module
 │   │   ├── database/      # SQLite configuration
 │   │   └── seed.ts        # Database seed script
+│   ├── build-sea.js       # Builds backend as single executable
 │   └── data/              # SQLite database file (gitignored)
 ├── .env.example           # Environment variable template
-├── start.js               # Single-command launcher
+├── start.js               # Browser-mode launcher
 ├── Makefile               # Command shortcuts
 └── README.md
 ```
