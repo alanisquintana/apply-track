@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  Box, Typography, Paper, IconButton, Button, Stack, Dialog, DialogTitle, DialogContent, Snackbar, Alert,
+  Box, Typography, Paper, IconButton, Button, Stack, Dialog, DialogTitle, DialogContent, Snackbar, Alert, Avatar,
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import EditIcon from '@mui/icons-material/Edit'
@@ -88,10 +88,11 @@ export function ApplicationDetail() {
 
   return (
     <Box>
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 3 }}>
+      <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
         <IconButton onClick={() => navigate(-1)} sx={{ color: colors.muted }}>
           <ArrowBackIcon />
         </IconButton>
+        {app.logoUrl && <Avatar src={app.logoUrl} alt={app.company} sx={{ width: 32, height: 32 }} />}
         <Typography variant="h5" sx={{ fontWeight: 700, color: colors.text }}>
           {app.company}
         </Typography>

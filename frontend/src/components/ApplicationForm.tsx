@@ -50,6 +50,7 @@ interface FormState {
   interviewTime: dayjs.Dayjs | null
   link: string
   appliedWhere: string
+  logoUrl: string
 }
 
 function toDayjs(val: string | null | undefined) {
@@ -66,6 +67,7 @@ const emptyForm = (): FormState => ({
   interviewTime: null,
   link: '',
   appliedWhere: '',
+  logoUrl: '',
 })
 
 export function ApplicationForm({ initial, onSave, onCancel }: Props) {
@@ -81,6 +83,7 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
           interviewTime: initial.interviewTime ? dayjs(initial.interviewTime, 'HH:mm') : null,
           link: initial.link ?? '',
           appliedWhere: initial.appliedWhere ?? '',
+          logoUrl: initial.logoUrl ?? '',
         }
       : emptyForm(),
   )
@@ -124,6 +127,7 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
         interviewTime,
         link: values.link.trim() || undefined,
         appliedWhere: values.appliedWhere.trim() || undefined,
+        logoUrl: values.logoUrl.trim() || undefined,
       }
       await onSave(payload as CreateApplicationPayload & UpdateApplicationPayload)
     } finally {
@@ -240,6 +244,13 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
         onChange={e => set('appliedWhere', e.target.value)}
         fullWidth
         placeholder="e.g. LinkedIn, company website"
+      />
+      <TextField
+        label="Company logo URL"
+        value={values.logoUrl}
+        onChange={e => set('logoUrl', e.target.value)}
+        fullWidth
+        placeholder="https://example.com/logo.png"
       />
       <Stack direction="row" spacing={1} justifyContent="flex-end">
         <Button onClick={onCancel}>Cancel</Button>

@@ -37,4 +37,8 @@ export class CreateApplicationDto {
   @IsString()
   @IsOptional()
   appliedWhere?: string;
+
+  @IsString()
+  @IsOptional()
+  logoUrl?: string;
 }

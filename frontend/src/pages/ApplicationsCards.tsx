@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Box, Typography, Card, CardContent, Stack, Snackbar, Alert,
-  TextField, Select, MenuItem, IconButton, Chip,
+  TextField, Select, MenuItem, IconButton, Chip, Avatar,
 } from '@mui/material'
 import Search from '@mui/icons-material/Search'
+import BusinessIcon from '@mui/icons-material/Business'
 import ArrowUpward from '@mui/icons-material/ArrowUpward'
 import ArrowDownward from '@mui/icons-material/ArrowDownward'
 import dayjs from 'dayjs'
@@ -207,21 +208,31 @@ export function ApplicationsCards() {
             sx={{ bgcolor: colors.elevation, borderRadius: 2, cursor: 'pointer', transition: 'box-shadow 0.15s', '&:hover': { boxShadow: `0 0 0 1px ${colors.divider}` } }}
           >
             <CardContent>
-              <Stack spacing={0.5} sx={{ mb: 1 }}>
-                <Typography variant="caption" sx={{ color: colors.muted, fontSize: '0.72rem', textAlign: 'right' }}>
+              <Stack direction="row" alignItems="flex-start" sx={{ mb: 0.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Avatar
+                    src={app.logoUrl || undefined}
+                    alt={app.company}
+                    sx={{ width: 36, height: 36, bgcolor: colors.divider }}
+                  >
+                    {!app.logoUrl && <BusinessIcon sx={{ color: colors.muted, fontSize: 20 }} />}
+                  </Avatar>
+                </Box>
+                <Box sx={{ flex: 1 }} />
+                <Typography variant="caption" sx={{ color: colors.muted, fontSize: '0.72rem', flexShrink: 0 }}>
                   {dayjs(app.appliedAt).format('DD/MM/YYYY')}
                 </Typography>
-                <Stack direction="row" alignItems="center" spacing={0} sx={{ minWidth: 0 }}>
-                  <Typography variant="body1" sx={{ color: colors.text, fontWeight: 600, lineHeight: 1.4, whiteSpace: 'nowrap' }}>
-                    {app.company}
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: colors.muted, fontSize: '0.5rem', lineHeight: 1.4, userSelect: 'none', display: 'flex', alignItems: 'center', mx: 0.8 }}>
-                    ●
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: colors.muted, lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-                    {app.role}
-                  </Typography>
-                </Stack>
+              </Stack>
+              <Stack direction="row" alignItems="center" spacing={0} sx={{ minWidth: 0, mb: 1 }}>
+                <Typography variant="body1" sx={{ color: colors.text, fontWeight: 600, lineHeight: 1.4, whiteSpace: 'nowrap' }}>
+                  {app.company}
+                </Typography>
+                <Typography variant="body1" sx={{ color: colors.muted, fontSize: '0.5rem', lineHeight: 1.4, userSelect: 'none', display: 'flex', alignItems: 'center', mx: 0.8 }}>
+                  ●
+                </Typography>
+                <Typography variant="body1" sx={{ color: colors.muted, lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                  {app.role}
+                </Typography>
               </Stack>
 
               <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 1 }}>

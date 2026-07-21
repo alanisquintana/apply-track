@@ -11,6 +11,7 @@ export interface Application {
   interviewTime: string | null
   link: string | null
   appliedWhere: string | null
+  logoUrl: string | null
   createdAt: string
   updatedAt: string
 }
@@ -25,6 +26,7 @@ export interface CreateApplicationPayload {
   interviewTime?: string
   link?: string
   appliedWhere?: string
+  logoUrl?: string
 }
 
 export interface UpdateApplicationPayload {
@@ -37,4 +39,5 @@ export interface UpdateApplicationPayload {
   interviewTime?: string
   link?: string
   appliedWhere?: string
+  logoUrl?: string
 }
