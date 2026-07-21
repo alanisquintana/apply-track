@@ -104,12 +104,15 @@ export function ApplicationDetail() {
       <Paper elevation={0} sx={{ bgcolor: colors.elevation, borderRadius: 2, p: 3 }}>
         <Stack spacing={3}>
           <Field label="Role" value={app.role} />
-          <Field label="Status" value={
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: statusDotColors[app.status] ?? colors.muted }} />
+          <Box>
+            <Typography variant="caption" sx={{ color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.72rem' }}>
+              Status
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.25 }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: statusDotColors[app.status] ?? colors.muted, flexShrink: 0 }} />
               <Typography sx={{ color: colors.text }}>{statusLabels[app.status] ?? app.status}</Typography>
-            </Stack>
-          } />
+            </Box>
+          </Box>
           <Field label="Applied" value={dayjs(app.appliedAt).format('DD/MM/YYYY')} />
           {app.description && <Field label="Description" value={<span dangerouslySetInnerHTML={{ __html: app.description }} />} />}
           {app.interviewDate && <Field label="Interview Date" value={`${dayjs(app.interviewDate).format('DD/MM/YYYY')}${app.interviewTime ? ` ${app.interviewTime}` : ''}`} />}
