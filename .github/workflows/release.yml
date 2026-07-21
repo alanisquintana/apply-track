@@ -31,7 +31,7 @@ jobs:
         working-directory: backend
 
       - name: Install frontend deps
-        run: npm ci
+        run: npm install
         working-directory: frontend
 
       - name: Build frontend
