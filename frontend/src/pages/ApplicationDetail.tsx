@@ -81,7 +81,7 @@ export function ApplicationDetail() {
         <Typography variant="caption" sx={{ color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.72rem' }}>
           {label}
         </Typography>
-        <Typography sx={{ color: colors.text, mt: 0.25, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>{value}</Typography>
+        <Typography sx={{ color: colors.text, mt: 0.25, overflowWrap: 'break-word', wordBreak: 'normal', whiteSpace: 'pre-wrap' }}>{value}</Typography>
       </Box>
     )
   }
