@@ -1,6 +1,7 @@
 import type { Application, CreateApplicationPayload, UpdateApplicationPayload } from '../types/application'
 
-const BASE = '/api/applications'
+const API = import.meta.env.VITE_API_URL ?? ''
+const BASE = `${API}/api/applications`
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
