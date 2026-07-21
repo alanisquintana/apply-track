@@ -36,6 +36,9 @@ export class Application {
   @Column({ type: 'date', nullable: true })
   interviewDate: string | null;
 
+  @Column({ type: 'varchar', length: 5, nullable: true })
+  interviewTime: string | null;
+
   @Column({ type: 'varchar', length: 500, nullable: true })
   link: string | null;
 

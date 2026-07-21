@@ -12,12 +12,13 @@ The default language for this project is **English**. All user-facing output, co
 ## Dev Workflow
 
 ### Quick Start (one command)
-- Run `make dev` to: ensure Docker PostgreSQL is up, build backend, and start both servers.
+- Run `make up` to build and start all services via Docker.
 - Open `http://localhost:3000` in the browser.
 
 ### Build & Restart
 - Always kill existing processes before starting new ones: `Get-Process node | Where-Object CommandLine -match "dist/main|vite" | Stop-Process -Force`
-- To run everything from scratch: `make dev`
+- To run everything from scratch with Docker: `make up`
+- For local native dev: `docker compose up -d postgres` then build backend + start backend and frontend manually.
 - The `.env` file expects PostgreSQL on `localhost:5433` (Docker container `applytrack-db`). Do NOT change the DB port — use Docker for PostgreSQL.
 - Build backend: `cd backend && npx nest build` (~100ms with SWC)
 - Start backend: `node backend/dist/main.js`

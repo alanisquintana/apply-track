@@ -28,6 +28,10 @@ export class CreateApplicationDto {
 
   @IsString()
   @IsOptional()
+  interviewTime?: string;
+
+  @IsString()
+  @IsOptional()
   link?: string;
 
   @IsString()

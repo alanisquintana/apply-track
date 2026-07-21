@@ -5,6 +5,7 @@ import {
 } from '@mui/material'
 import { colors } from '../theme/colors'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
 import dayjs from 'dayjs'
@@ -46,6 +47,7 @@ interface FormState {
   appliedAt: dayjs.Dayjs | null
   description: string
   interviewDate: dayjs.Dayjs | null
+  interviewTime: dayjs.Dayjs | null
   link: string
   appliedWhere: string
 }
@@ -61,6 +63,7 @@ const emptyForm = (): FormState => ({
   appliedAt: null,
   description: '',
   interviewDate: null,
+  interviewTime: null,
   link: '',
   appliedWhere: '',
 })
@@ -75,6 +78,7 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
           appliedAt: dayjs(initial.appliedAt),
           description: initial.description ?? '',
           interviewDate: toDayjs(initial.interviewDate),
+          interviewTime: initial.interviewTime ? dayjs(initial.interviewTime, 'HH:mm') : null,
           link: initial.link ?? '',
           appliedWhere: initial.appliedWhere ?? '',
         }
@@ -106,6 +110,7 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
     try {
       let status = values.status
       const interviewDate = values.interviewDate?.format('YYYY-MM-DD')
+      const interviewTime = values.interviewTime?.format('HH:mm')
       if (interviewDate && status === 'applied') {
         status = 'interviewing'
       }
@@ -116,6 +121,7 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
         appliedAt: values.appliedAt!.format('YYYY-MM-DD'),
         description: values.description.replace(/<[^>]*>/g, '').trim() ? values.description : undefined,
         interviewDate,
+        interviewTime,
         link: values.link.trim() || undefined,
         appliedWhere: values.appliedWhere.trim() || undefined,
       }
@@ -199,18 +205,28 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
           />
         </Box>
       </Box>
-      <DatePicker
-        label="Interview date"
-        value={values.interviewDate}
-        onChange={v => set('interviewDate', v)}
-        slotProps={{
-          textField: {
-            fullWidth: true,
-            error: !!errors.interviewDate,
-            helperText: errors.interviewDate,
-          },
-        }}
-      />
+      <Stack direction="row" spacing={2}>
+        <DatePicker
+          label="Interview date"
+          value={values.interviewDate}
+          onChange={v => set('interviewDate', v)}
+          slotProps={{
+            textField: {
+              fullWidth: true,
+              error: !!errors.interviewDate,
+              helperText: errors.interviewDate,
+            },
+          }}
+          sx={{ flex: 1 }}
+        />
+        <TimePicker
+          label="Interview time"
+          value={values.interviewTime}
+          onChange={v => set('interviewTime', v)}
+          slotProps={{ textField: { fullWidth: true } }}
+          sx={{ flex: 1 }}
+        />
+      </Stack>
       <TextField
         label="Link"
         value={values.link}

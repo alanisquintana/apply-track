@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Box, Typography, Fab, Dialog, DialogTitle, DialogContent, Snackbar, Alert,
   IconButton, Popover, Stack, Badge,
@@ -23,6 +24,7 @@ const statusDotColors: Record<string, string> = {
 }
 
 export function Layout({ children }: { children: ReactNode }) {
+  const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
   const { refresh } = useRefresh()
   const [snackbar, setSnackbar] = useState<{ message: string; severity: 'success' | 'error' } | null>(null)
@@ -62,8 +64,21 @@ export function Layout({ children }: { children: ReactNode }) {
 
   function InterviewDay(props: any) {
     const key = props.day.format('YYYY-MM-DD')
-    const hasInterview = !!interviewDateMap[key]
-    return <Badge color="error" variant="dot" invisible={!hasInterview}><PickerDay {...props} /></Badge>
+    const appsOnDay = interviewDateMap[key]
+    const hasInterview = !!appsOnDay
+    return (
+      <Badge color="error" variant="dot" invisible={!hasInterview}>
+        <PickerDay
+          {...props}
+          onClick={() => {
+            if (appsOnDay) {
+              handleCalClose()
+              navigate(`/applications/${appsOnDay[0].id}`)
+            }
+          }}
+        />
+      </Badge>
+    )
   }
 
   async function handleCreate(data: CreateApplicationPayload | UpdateApplicationPayload) {
@@ -119,7 +134,8 @@ export function Layout({ children }: { children: ReactNode }) {
               {upcomingInterviews.map(app => (
                 <Box
                   key={app.id}
-                  sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'default', p: 0.5, borderRadius: 1 }}
+                  onClick={() => { handleCalClose(); navigate(`/applications/${app.id}`) }}
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', p: 0.5, borderRadius: 1, '&:hover': { bgcolor: colors.background } }}
                 >
                   <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: statusDotColors[app.status] ?? colors.muted, flexShrink: 0 }} />
                   <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -128,7 +144,7 @@ export function Layout({ children }: { children: ReactNode }) {
                     </Typography>
                   </Box>
                   <Typography variant="caption" sx={{ color: colors.muted, fontSize: '0.7rem', flexShrink: 0 }}>
-                    {dayjs(app.interviewDate).format('DD/MM')}
+                    {app.interviewTime ? `${dayjs(app.interviewDate).format('DD/MM')} ${app.interviewTime}` : dayjs(app.interviewDate).format('DD/MM')}
                   </Typography>
                 </Box>
               ))}

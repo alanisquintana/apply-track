@@ -241,7 +241,7 @@ export function ApplicationsCards() {
                 )}
                 {app.interviewDate && (
                   <Typography variant="caption" sx={{ color: colors.primary, fontSize: '0.75rem' }}>
-                    Interview: {dayjs(app.interviewDate).format('DD/MM/YYYY')}
+                    Interview: {dayjs(app.interviewDate).format('DD/MM/YYYY')}{app.interviewTime ? ` ${app.interviewTime}` : ''}
                   </Typography>
                 )}
               </Stack>

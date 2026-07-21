@@ -22,9 +22,3 @@ clean:
 
 test:
 	cd backend && npm run test:e2e
-
-dev:
-	docker compose up -d postgres
-	cd backend && npx nest build
-	start /B node backend/dist/main.js
-	start /B node frontend/node_modules/vite/bin/vite.js --port 3000

@@ -111,7 +111,7 @@ export function ApplicationDetail() {
           } />
           <Field label="Applied" value={dayjs(app.appliedAt).format('DD/MM/YYYY')} />
           {app.description && <Field label="Description" value={<span dangerouslySetInnerHTML={{ __html: app.description }} />} />}
-          {app.interviewDate && <Field label="Interview Date" value={dayjs(app.interviewDate).format('DD/MM/YYYY')} />}
+          {app.interviewDate && <Field label="Interview Date" value={`${dayjs(app.interviewDate).format('DD/MM/YYYY')}${app.interviewTime ? ` ${app.interviewTime}` : ''}`} />}
           {app.appliedWhere && <Field label="Applied Where" value={app.appliedWhere} />}
           {app.link && (
             <Field label="Link" value={
