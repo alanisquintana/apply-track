@@ -17,9 +17,7 @@ jobs:
             backend/package-lock.json
             frontend/package-lock.json
 
-      - uses: actions-rust-lang/setup-rust@v1
-        with:
-          rustflags: ''
+      - run: rustup update stable && rustup default stable
 
       - name: Install backend deps
         run: npm ci
