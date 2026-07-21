@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-REPO_URL="https://github.com/AlanisQuintana/applytrack.git"
+REPO_URL="https://github.com/alanisquintana/apply-track.git"
 INSTALL_DIR="$HOME/applytrack"
 
 echo "Installing ApplyTrack..."

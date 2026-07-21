@@ -24,7 +24,7 @@ That's it. You do **not** need Docker, PostgreSQL, or anything else.
 Open your computer's terminal and paste:
 
 ```bash
-git clone https://github.com/AlanisQuintana/applytrack.git
+git clone https://github.com/alanisquintana/apply-track.git
 cd applytrack
 node start.js
 ```
@@ -51,7 +51,7 @@ Open **http://localhost:3000** in your browser — the app is ready.
 ### Manual setup
 
 ```bash
-git clone https://github.com/AlanisQuintana/applytrack.git
+git clone https://github.com/alanisquintana/apply-track.git
 cd applytrack
 cp .env.example .env
 node start.js
