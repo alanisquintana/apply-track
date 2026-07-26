@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import {
-  Box, TextField, MenuItem, Button, Stack, FormControl, InputLabel, Select,
-  FormHelperText,
+  Box, TextField, MenuItem, Button, Stack, FormControl, InputLabel, Select, Typography,
 } from '@mui/material'
 import { colors } from '../theme/colors'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -9,7 +8,7 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
 import dayjs from 'dayjs'
-import type { Application, CreateApplicationPayload, UpdateApplicationPayload } from '../types/application'
+import type { Application, CreateApplicationPayload, UpdateApplicationPayload, WorkModel } from '../types/application'
 
 const toolbar = [
   [{ header: ['1', '2', '3', false] }],
@@ -34,6 +33,12 @@ const STATUS_OPTIONS = [
   { label: 'Rejected', value: 'rejected' },
 ]
 
+const WORK_MODEL_OPTIONS = [
+  { label: 'Remote', value: 'remote' },
+  { label: 'Hybrid', value: 'hybrid' },
+  { label: 'On-site', value: 'on-site' },
+]
+
 interface Props {
   initial?: Application
   onSave: (data: CreateApplicationPayload | UpdateApplicationPayload) => Promise<void>
@@ -51,6 +56,11 @@ interface FormState {
   link: string
   appliedWhere: string
   logoUrl: string
+  salaryMin: string
+  salaryMax: string
+  recruiterLink: string
+  workModel: string
+  interviewLink: string
 }
 
 function toDayjs(val: string | null | undefined) {
@@ -68,6 +78,11 @@ const emptyForm = (): FormState => ({
   link: '',
   appliedWhere: '',
   logoUrl: '',
+  salaryMin: '',
+  salaryMax: '',
+  recruiterLink: '',
+  workModel: '',
+  interviewLink: '',
 })
 
 export function ApplicationForm({ initial, onSave, onCancel }: Props) {
@@ -84,6 +99,11 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
           link: initial.link ?? '',
           appliedWhere: initial.appliedWhere ?? '',
           logoUrl: initial.logoUrl ?? '',
+          salaryMin: initial.salaryMin?.toString() ?? '',
+          salaryMax: initial.salaryMax?.toString() ?? '',
+          recruiterLink: initial.recruiterLink ?? '',
+          workModel: initial.workModel ?? '',
+          interviewLink: initial.interviewLink ?? '',
         }
       : emptyForm(),
   )
@@ -128,6 +148,11 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
         link: values.link.trim() || undefined,
         appliedWhere: values.appliedWhere.trim() || undefined,
         logoUrl: values.logoUrl.trim() || undefined,
+        salaryMin: values.salaryMin ? Number(values.salaryMin) : undefined,
+        salaryMax: values.salaryMax ? Number(values.salaryMax) : undefined,
+        recruiterLink: values.recruiterLink.trim() || undefined,
+        workModel: (values.workModel as WorkModel) || undefined,
+        interviewLink: values.interviewLink.trim() || undefined,
       }
       await onSave(payload as CreateApplicationPayload & UpdateApplicationPayload)
     } finally {
@@ -137,6 +162,9 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
 
   return (
     <Stack spacing={2} sx={{ mt: 1 }}>
+      <Typography variant="subtitle2" sx={{ color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        Job Details
+      </Typography>
       <TextField
         label="Company"
         value={values.company}
@@ -180,6 +208,51 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
           },
         }}
       />
+      <FormControl fullWidth>
+        <InputLabel>Work model</InputLabel>
+        <Select
+          label="Work model"
+          value={values.workModel}
+          onChange={e => set('workModel', e.target.value)}
+        >
+          <MenuItem value=""><em>None</em></MenuItem>
+          {WORK_MODEL_OPTIONS.map(opt => (
+            <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <Stack direction="row" spacing={2}>
+        <TextField
+          label="Salary min"
+          value={values.salaryMin}
+          onChange={e => set('salaryMin', e.target.value)}
+          type="number"
+          sx={{ flex: 1 }}
+          placeholder="80000"
+        />
+        <TextField
+          label="Salary max"
+          value={values.salaryMax}
+          onChange={e => set('salaryMax', e.target.value)}
+          type="number"
+          sx={{ flex: 1 }}
+          placeholder="120000"
+        />
+      </Stack>
+      <TextField
+        label="Link"
+        value={values.link}
+        onChange={e => set('link', e.target.value)}
+        fullWidth
+        placeholder="https://"
+      />
+      <TextField
+        label="Applied where"
+        value={values.appliedWhere}
+        onChange={e => set('appliedWhere', e.target.value)}
+        fullWidth
+        placeholder="e.g. LinkedIn, company website"
+      />
       <Box>
         <InputLabel sx={{ mb: 0.5, fontSize: '0.8rem', color: colors.muted }}>Description</InputLabel>
         <Box
@@ -209,6 +282,17 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
           />
         </Box>
       </Box>
+      <TextField
+        label="Company logo URL"
+        value={values.logoUrl}
+        onChange={e => set('logoUrl', e.target.value)}
+        fullWidth
+        placeholder="https://example.com/logo.png"
+      />
+
+      <Typography variant="subtitle2" sx={{ color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em', mt: 1 }}>
+        Interview
+      </Typography>
       <Stack direction="row" spacing={2}>
         <DatePicker
           label="Interview date"
@@ -232,27 +316,25 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
         />
       </Stack>
       <TextField
-        label="Link"
-        value={values.link}
-        onChange={e => set('link', e.target.value)}
+        label="Interview link"
+        value={values.interviewLink}
+        onChange={e => set('interviewLink', e.target.value)}
         fullWidth
-        placeholder="https://"
+        placeholder="https://meet.google.com/xyz"
       />
+
+      <Typography variant="subtitle2" sx={{ color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em', mt: 1 }}>
+        Recruiter
+      </Typography>
       <TextField
-        label="Applied where"
-        value={values.appliedWhere}
-        onChange={e => set('appliedWhere', e.target.value)}
+        label="Recruiter link"
+        value={values.recruiterLink}
+        onChange={e => set('recruiterLink', e.target.value)}
         fullWidth
-        placeholder="e.g. LinkedIn, company website"
+        placeholder="https://linkedin.com/in/recruiter"
       />
-      <TextField
-        label="Company logo URL"
-        value={values.logoUrl}
-        onChange={e => set('logoUrl', e.target.value)}
-        fullWidth
-        placeholder="https://example.com/logo.png"
-      />
-      <Stack direction="row" spacing={1} justifyContent="flex-end">
+
+      <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 2 }}>
         <Button onClick={onCancel}>Cancel</Button>
         <Button variant="contained" onClick={handleSubmit} disabled={saving}>
           {saving ? 'Saving...' : 'Save'}

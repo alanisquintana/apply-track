@@ -12,7 +12,7 @@ import dayjs from 'dayjs'
 import { colors } from '../theme/colors'
 import { useRefresh } from '../hooks/useRefresh'
 import * as api from '../services/applications'
-import type { Application, ApplicationStatus } from '../types/application'
+import type { Application, ApplicationStatus, WorkModel } from '../types/application'
 
 const statusLabels: Record<string, string> = {
   applied: 'Applied',
@@ -37,7 +37,15 @@ const statusRank: Record<string, number> = {
 
 const allStatuses: ApplicationStatus[] = ['applied', 'interviewing', 'offer', 'rejected']
 
-type SortKey = 'company' | 'role' | 'status' | 'appliedAt' | 'interviewDate'
+const workModelLabels: Record<string, string> = {
+  remote: 'Remote',
+  hybrid: 'Hybrid',
+  'on-site': 'On-site',
+}
+
+const allWorkModels: WorkModel[] = ['remote', 'hybrid', 'on-site']
+
+type SortKey = 'company' | 'role' | 'status' | 'appliedAt' | 'interviewDate' | 'salary'
 
 const sortLabels: Record<SortKey, string> = {
   company: 'Company',
@@ -45,6 +53,7 @@ const sortLabels: Record<SortKey, string> = {
   status: 'Status',
   appliedAt: 'Applied',
   interviewDate: 'Interview',
+  salary: 'Salary',
 }
 
 export function ApplicationsCards() {
@@ -55,6 +64,7 @@ export function ApplicationsCards() {
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus[]>([])
+  const [workModelFilter, setWorkModelFilter] = useState<WorkModel[]>([])
   const [sortKey, setSortKey] = useState<SortKey>('appliedAt')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
 
@@ -74,15 +84,25 @@ export function ApplicationsCards() {
 
     if (search) {
       const q = search.toLowerCase()
-      list = list.filter(a => a.company.toLowerCase().includes(q) || a.role.toLowerCase().includes(q))
+      list = list.filter(a =>
+        a.company.toLowerCase().includes(q)
+        || a.role.toLowerCase().includes(q)
+        || (a.workModel && workModelLabels[a.workModel]?.toLowerCase().includes(q))
+        || (a.salaryMin != null && a.salaryMin.toString().includes(q))
+        || (a.salaryMax != null && a.salaryMax.toString().includes(q))
+      )
     }
 
     if (statusFilter.length > 0) {
       list = list.filter(a => statusFilter.includes(a.status))
     }
 
+    if (workModelFilter.length > 0) {
+      list = list.filter(a => a.workModel && workModelFilter.includes(a.workModel))
+    }
+
     return list
-  }, [apps, search, statusFilter])
+  }, [apps, search, statusFilter, workModelFilter])
 
   const sorted = useMemo(() => {
     const copy = [...filtered]
@@ -95,7 +115,9 @@ export function ApplicationsCards() {
         return vb.localeCompare(va)
       }
       let cmp = 0
-      if (sortKey === 'appliedAt' || sortKey === 'interviewDate') {
+      if (sortKey === 'salary') {
+        cmp = (a.salaryMin ?? -1) - (b.salaryMin ?? -1)
+      } else if (sortKey === 'appliedAt' || sortKey === 'interviewDate') {
         const va = a[sortKey] || ''
         const vb = b[sortKey] || ''
         cmp = va.localeCompare(vb)
@@ -113,12 +135,18 @@ export function ApplicationsCards() {
     )
   }
 
+  function toggleWorkModel(model: WorkModel) {
+    setWorkModelFilter(prev =>
+      prev.includes(model) ? prev.filter(m => m !== model) : [...prev, model],
+    )
+  }
+
   return (
     <Box>
       <Stack spacing={2} sx={{ mb: 3 }}>
         <TextField
           size="small"
-          placeholder="Search by company or role..."
+          placeholder="Search by company, role, salary or work model..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           slotProps={{
@@ -137,66 +165,86 @@ export function ApplicationsCards() {
           }}
         />
 
-        <Stack direction="row" alignItems="center" spacing={1.5}>
-          <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-            <Chip
-              label="All"
-              size="small"
-              variant={statusFilter.length === 0 ? 'filled' : 'outlined'}
-              onClick={() => setStatusFilter([])}
-              sx={{
-                color: statusFilter.length === 0 ? colors.background : colors.muted,
-                bgcolor: statusFilter.length === 0 ? colors.primary : 'transparent',
-                borderColor: colors.divider,
-                '&:hover': { bgcolor: colors.primary, color: colors.background, opacity: 0.85 },
-              }}
-            />
-            {allStatuses.map(s => (
+        <Stack spacing={0}>
+          <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap" useFlexGap>
+            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
               <Chip
-                key={s}
-                label={statusLabels[s]}
+                label="All"
                 size="small"
-                variant={statusFilter.includes(s) ? 'filled' : 'outlined'}
-                onClick={() => toggleStatus(s)}
+                variant={statusFilter.length === 0 ? 'filled' : 'outlined'}
+                onClick={() => setStatusFilter([])}
                 sx={{
-                  color: statusFilter.includes(s) ? colors.background : colors.muted,
-                  bgcolor: statusFilter.includes(s) ? colors.primary : 'transparent',
+                  color: statusFilter.length === 0 ? colors.background : colors.muted,
+                  bgcolor: statusFilter.length === 0 ? colors.primary : 'transparent',
                   borderColor: colors.divider,
                   '&:hover': { bgcolor: colors.primary, color: colors.background, opacity: 0.85 },
                 }}
               />
-            ))}
+              {allStatuses.map(s => (
+                <Chip
+                  key={s}
+                  label={statusLabels[s]}
+                  size="small"
+                  variant={statusFilter.includes(s) ? 'filled' : 'outlined'}
+                  onClick={() => toggleStatus(s)}
+                  sx={{
+                    color: statusFilter.includes(s) ? colors.background : colors.muted,
+                    bgcolor: statusFilter.includes(s) ? colors.primary : 'transparent',
+                    borderColor: colors.divider,
+                    '&:hover': { bgcolor: colors.primary, color: colors.background, opacity: 0.85 },
+                  }}
+                />
+              ))}
+            </Stack>
+
+            <Box sx={{ flexGrow: 1 }} />
+
+            <Select
+              size="small"
+              value={sortKey}
+              onChange={e => setSortKey(e.target.value as SortKey)}
+              sx={{
+                color: colors.text,
+                bgcolor: colors.elevation,
+                minWidth: 120,
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider },
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.muted },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: colors.primary },
+                '& .MuiSvgIcon-root': { color: colors.muted },
+              }}
+            >
+              {Object.entries(sortLabels).map(([key, label]) => (
+                <MenuItem key={key} value={key}>{label}</MenuItem>
+              ))}
+            </Select>
+
+            <IconButton
+              size="small"
+              onClick={() => setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'))}
+              sx={{ color: colors.muted, border: `1px solid ${colors.divider}`, borderRadius: 1, p: '5px' }}
+            >
+              {sortDir === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />}
+            </IconButton>
           </Stack>
 
-          <Box sx={{ flexGrow: 1 }} />
-
-          <Select
-            size="small"
-            value={sortKey}
-            onChange={e => setSortKey(e.target.value as SortKey)}
-            sx={{
-              color: colors.text,
-              bgcolor: colors.elevation,
-              minWidth: 120,
-              '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider },
-              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.muted },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: colors.primary },
-              '& .MuiSvgIcon-root': { color: colors.muted },
-            }}
-          >
-            {Object.entries(sortLabels).map(([key, label]) => (
-              <MenuItem key={key} value={key}>{label}</MenuItem>
-            ))}
-          </Select>
-
-          <IconButton
-            size="small"
-            onClick={() => setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'))}
-            sx={{ color: colors.muted, border: `1px solid ${colors.divider}`, borderRadius: 1, p: '5px' }}
-          >
-            {sortDir === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />}
-          </IconButton>
+          <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+          {allWorkModels.map(m => (
+            <Chip
+              key={m}
+              label={workModelLabels[m]}
+              size="small"
+              variant={workModelFilter.includes(m) ? 'filled' : 'outlined'}
+              onClick={() => toggleWorkModel(m)}
+              sx={{
+                color: workModelFilter.includes(m) ? colors.background : colors.muted,
+                bgcolor: workModelFilter.includes(m) ? colors.primary : 'transparent',
+                borderColor: colors.divider,
+                '&:hover': { bgcolor: colors.primary, color: colors.background, opacity: 0.85 },
+              }}
+            />
+          ))}
         </Stack>
+      </Stack>
       </Stack>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 2 }}>
@@ -253,6 +301,16 @@ export function ApplicationsCards() {
                 {app.interviewDate && (
                   <Typography variant="caption" sx={{ color: colors.primary, fontSize: '0.75rem' }}>
                     Interview: {dayjs(app.interviewDate).format('DD/MM/YYYY')}{app.interviewTime ? ` ${app.interviewTime}` : ''}
+                  </Typography>
+                )}
+                {app.workModel && (
+                  <Typography variant="caption" sx={{ color: colors.muted, fontSize: '0.75rem' }}>
+                    {app.workModel === 'remote' ? 'Remote' : app.workModel === 'hybrid' ? 'Hybrid' : 'On-site'}
+                  </Typography>
+                )}
+                {app.salaryMin != null && app.salaryMax != null && (
+                  <Typography variant="caption" sx={{ color: colors.muted, fontSize: '0.75rem' }}>
+                    ${Number(app.salaryMin).toLocaleString()} - ${Number(app.salaryMax).toLocaleString()}
                   </Typography>
                 )}
               </Stack>

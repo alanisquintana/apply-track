@@ -26,7 +26,7 @@ const statusDotColors: Record<string, string> = {
 export function Layout({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
-  const { refresh } = useRefresh()
+  const { version, refresh } = useRefresh()
   const [snackbar, setSnackbar] = useState<{ message: string; severity: 'success' | 'error' } | null>(null)
 
   const [apps, setApps] = useState<Application[]>([])
@@ -34,7 +34,7 @@ export function Layout({ children }: { children: ReactNode }) {
     try {
       setApps(await api.getAll())
     } catch { /* calendar silently fails */ }
-  }, [])
+  }, [version])
   useEffect(() => { fetchApps() }, [fetchApps])
 
   const [calAnchor, setCalAnchor] = useState<HTMLElement | null>(null)

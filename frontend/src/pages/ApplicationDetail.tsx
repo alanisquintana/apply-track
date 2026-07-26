@@ -10,6 +10,7 @@ import LinkIcon from '@mui/icons-material/Link'
 import dayjs from 'dayjs'
 import { colors } from '../theme/colors'
 import { ApplicationForm } from '../components/ApplicationForm'
+import { useRefresh } from '../hooks/useRefresh'
 import * as api from '../services/applications'
 import type { Application, UpdateApplicationPayload } from '../types/application'
 
@@ -30,6 +31,7 @@ const statusDotColors: Record<string, string> = {
 export function ApplicationDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { refresh } = useRefresh()
   const [app, setApp] = useState<Application | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
@@ -51,6 +53,7 @@ export function ApplicationDetail() {
       setApp(updated)
       setEditing(false)
       setSnackbar({ message: 'Application updated', severity: 'success' })
+      refresh()
     } catch (e) {
       setSnackbar({ message: e instanceof Error ? e.message : 'Failed to update', severity: 'error' })
     }
@@ -60,6 +63,7 @@ export function ApplicationDetail() {
     if (!app) return
     try {
       await api.remove(app.id)
+      refresh()
       navigate(-1)
     } catch (e) {
       setSnackbar({ message: e instanceof Error ? e.message : 'Failed to delete', severity: 'error' })
@@ -103,6 +107,9 @@ export function ApplicationDetail() {
 
       <Paper elevation={0} sx={{ bgcolor: colors.elevation, borderRadius: 2, p: 3 }}>
         <Stack spacing={3}>
+          <Typography variant="subtitle2" sx={{ color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Job Details
+          </Typography>
           <Field label="Role" value={app.role} />
           <Box>
             <Typography variant="caption" sx={{ color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.72rem' }}>
@@ -114,9 +121,12 @@ export function ApplicationDetail() {
             </Box>
           </Box>
           <Field label="Applied" value={dayjs(app.appliedAt).format('DD/MM/YYYY')} />
-          {app.description && <Field label="Description" value={<span dangerouslySetInnerHTML={{ __html: app.description }} />} />}
-          {app.interviewDate && <Field label="Interview Date" value={`${dayjs(app.interviewDate).format('DD/MM/YYYY')}${app.interviewTime ? ` ${app.interviewTime}` : ''}`} />}
-          {app.appliedWhere && <Field label="Applied Where" value={app.appliedWhere} />}
+          {app.workModel && (
+            <Field label="Work Model" value={app.workModel === 'remote' ? 'Remote' : app.workModel === 'hybrid' ? 'Hybrid' : 'On-site'} />
+          )}
+          {app.salaryMin != null && app.salaryMax != null && (
+            <Field label="Salary Range" value={`$${Number(app.salaryMin).toLocaleString()} - $${Number(app.salaryMax).toLocaleString()}`} />
+          )}
           {app.link && (
             <Field label="Link" value={
               <Button
@@ -130,6 +140,47 @@ export function ApplicationDetail() {
                 {app.link}
               </Button>
             } />
+          )}
+          {app.appliedWhere && <Field label="Applied Where" value={app.appliedWhere} />}
+          {app.description && <Field label="Description" value={<span dangerouslySetInnerHTML={{ __html: app.description }} />} />}
+
+          <Typography variant="subtitle2" sx={{ color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Interview
+          </Typography>
+          {app.interviewDate && <Field label="Interview Date" value={`${dayjs(app.interviewDate).format('DD/MM/YYYY')}${app.interviewTime ? ` ${app.interviewTime}` : ''}`} />}
+          {app.interviewLink && (
+            <Field label="Interview Link" value={
+              <Button
+                component="a"
+                href={app.interviewLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                startIcon={<LinkIcon />}
+                sx={{ color: colors.primary, textTransform: 'none', p: 0, minWidth: 0, maxWidth: '100%', textAlign: 'left', wordBreak: 'break-all', '&:hover': { backgroundColor: 'transparent', textDecoration: 'underline' } }}
+              >
+                {app.interviewLink}
+              </Button>
+            } />
+          )}
+
+          <Typography variant="subtitle2" sx={{ color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Recruiter
+          </Typography>
+          {app.recruiterLink ? (
+            <Field label="Recruiter Link" value={
+              <Button
+                component="a"
+                href={app.recruiterLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                startIcon={<LinkIcon />}
+                sx={{ color: colors.primary, textTransform: 'none', p: 0, minWidth: 0, maxWidth: '100%', textAlign: 'left', wordBreak: 'break-all', '&:hover': { backgroundColor: 'transparent', textDecoration: 'underline' } }}
+              >
+                {app.recruiterLink}
+              </Button>
+            } />
+          ) : (
+            <Typography variant="body2" sx={{ color: colors.muted }}>No recruiter link</Typography>
           )}
         </Stack>
       </Paper>

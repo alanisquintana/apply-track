@@ -13,6 +13,12 @@ export enum ApplicationStatus {
   Rejected = 'rejected',
 }
 
+export enum WorkModel {
+  Remote = 'remote',
+  Hybrid = 'hybrid',
+  OnSite = 'on-site',
+}
+
 @Entity('applications')
 export class Application {
   @PrimaryGeneratedColumn('uuid')
@@ -47,6 +53,21 @@ export class Application {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   appliedWhere: string | null;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  salaryMin: number | null;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  salaryMax: number | null;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  recruiterLink: string | null;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  workModel: WorkModel | null;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  interviewLink: string | null;
 
   @CreateDateColumn()
   createdAt: Date;
