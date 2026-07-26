@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react'
+import { useState, useEffect, useMemo, useCallback, useContext, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Box, Typography, Fab, Dialog, DialogTitle, DialogContent, Snackbar, Alert,
@@ -7,27 +7,32 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import TrackChangesIcon from '@mui/icons-material/TrackChanges'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import LightModeIcon from '@mui/icons-material/LightMode'
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
 import { PickerDay } from '@mui/x-date-pickers/PickerDay'
 import dayjs from 'dayjs'
-import { colors } from '../theme/colors'
+import { useColors } from '../hooks/useColors'
 import { ApplicationForm } from './ApplicationForm'
 import { useRefresh } from '../hooks/useRefresh'
+import { ThemeModeContext } from '../hooks/ThemeModeContext'
 import * as api from '../services/applications'
 import type { Application, CreateApplicationPayload, UpdateApplicationPayload } from '../types/application'
 
-const statusDotColors: Record<string, string> = {
-  applied: colors.muted,
-  interviewing: colors.primary,
-  offer: colors.success,
-  rejected: colors.danger,
-}
-
 export function Layout({ children }: { children: ReactNode }) {
+  const colors = useColors()
+  const { mode, toggle: toggleTheme } = useContext(ThemeModeContext)
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
   const { version, refresh } = useRefresh()
   const [snackbar, setSnackbar] = useState<{ message: string; severity: 'success' | 'error' } | null>(null)
+
+  const statusDotColors: Record<string, string> = {
+    applied: colors.muted,
+    interviewing: colors.primary,
+    offer: colors.success,
+    rejected: colors.danger,
+  }
 
   const [apps, setApps] = useState<Application[]>([])
   const fetchApps = useCallback(async () => {
@@ -102,6 +107,9 @@ export function Layout({ children }: { children: ReactNode }) {
             ApplyTrack
           </Typography>
           <Box sx={{ flex: 1 }} />
+          <IconButton onClick={toggleTheme} sx={{ color: colors.muted }}>
+            {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+          </IconButton>
           <IconButton onClick={handleCalClick} sx={{ color: colors.muted }}>
             <CalendarMonthIcon />
           </IconButton>

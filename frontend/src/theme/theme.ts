@@ -1,24 +1,26 @@
 import { createTheme, alpha } from '@mui/material/styles'
-import { colors } from './colors'
+import { getColors, type ThemeColors } from './colors'
 
-export const muiTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: { main: colors.primary },
-    secondary: { main: colors.primary },
-    success: { main: colors.success },
-    error: { main: colors.danger },
-    info: { main: colors.primary },
-    background: {
-      default: colors.background,
-      paper: colors.elevation,
+export function createAppTheme(mode: 'light' | 'dark') {
+  const colors = getColors(mode)
+  return createTheme({
+    palette: {
+      mode,
+      primary: { main: colors.primary },
+      secondary: { main: colors.primary },
+      success: { main: colors.success },
+      error: { main: colors.danger },
+      info: { main: colors.primary },
+      background: {
+        default: colors.background,
+        paper: colors.elevation,
+      },
+      text: {
+        primary: colors.text,
+        secondary: colors.muted,
+      },
+      divider: colors.divider,
     },
-    text: {
-      primary: colors.text,
-      secondary: colors.muted,
-    },
-    divider: colors.divider,
-  },
   typography: {
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     h5: { fontWeight: 700 },
@@ -109,4 +111,5 @@ export const muiTheme = createTheme({
       },
     },
   },
-})
+  })
+}

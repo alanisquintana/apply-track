@@ -2,7 +2,7 @@ import { useState } from 'react'
 import {
   Box, TextField, MenuItem, Button, Stack, FormControl, InputLabel, Select, Typography,
 } from '@mui/material'
-import { colors } from '../theme/colors'
+import { useColors } from '../hooks/useColors'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import ReactQuill from 'react-quill-new'
@@ -86,6 +86,7 @@ const emptyForm = (): FormState => ({
 })
 
 export function ApplicationForm({ initial, onSave, onCancel }: Props) {
+  const colors = useColors()
   const [values, setValues] = useState<FormState>(
     initial
       ? {

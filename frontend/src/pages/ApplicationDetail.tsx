@@ -8,8 +8,8 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import LinkIcon from '@mui/icons-material/Link'
 import dayjs from 'dayjs'
-import { colors } from '../theme/colors'
 import { ApplicationForm } from '../components/ApplicationForm'
+import { useColors } from '../hooks/useColors'
 import { useRefresh } from '../hooks/useRefresh'
 import * as api from '../services/applications'
 import type { Application, UpdateApplicationPayload } from '../types/application'
@@ -21,17 +21,18 @@ const statusLabels: Record<string, string> = {
   rejected: 'Rejected',
 }
 
-const statusDotColors: Record<string, string> = {
-  applied: colors.muted,
-  interviewing: colors.primary,
-  offer: colors.success,
-  rejected: colors.danger,
-}
-
 export function ApplicationDetail() {
+  const colors = useColors()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { refresh } = useRefresh()
+
+  const statusDotColors: Record<string, string> = {
+    applied: colors.muted,
+    interviewing: colors.primary,
+    offer: colors.success,
+    rejected: colors.danger,
+  }
   const [app, setApp] = useState<Application | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)

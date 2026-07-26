@@ -9,8 +9,8 @@ import BusinessIcon from '@mui/icons-material/Business'
 import ArrowUpward from '@mui/icons-material/ArrowUpward'
 import ArrowDownward from '@mui/icons-material/ArrowDownward'
 import dayjs from 'dayjs'
-import { colors } from '../theme/colors'
 import { useRefresh } from '../hooks/useRefresh'
+import { useColors } from '../hooks/useColors'
 import * as api from '../services/applications'
 import type { Application, ApplicationStatus, WorkModel } from '../types/application'
 
@@ -19,13 +19,6 @@ const statusLabels: Record<string, string> = {
   interviewing: 'Interviewing',
   offer: 'Offer',
   rejected: 'Rejected',
-}
-
-const statusDotColors: Record<string, string> = {
-  applied: colors.muted,
-  interviewing: colors.primary,
-  offer: colors.success,
-  rejected: colors.danger,
 }
 
 const statusRank: Record<string, number> = {
@@ -57,9 +50,17 @@ const sortLabels: Record<SortKey, string> = {
 }
 
 export function ApplicationsCards() {
+  const colors = useColors()
   const navigate = useNavigate()
   const [apps, setApps] = useState<Application[]>([])
   const { version } = useRefresh()
+
+  const statusDotColors: Record<string, string> = {
+    applied: colors.muted,
+    interviewing: colors.primary,
+    offer: colors.success,
+    rejected: colors.danger,
+  }
   const [snackbar, setSnackbar] = useState<{ message: string; severity: 'success' | 'error' } | null>(null)
 
   const [search, setSearch] = useState('')
