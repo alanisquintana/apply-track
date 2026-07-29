@@ -6,3 +6,4 @@ dist/
 HANDOFF-*.md
 PLAN.md
 backend/data/
+frontend/src-tauri/binaries/node_modules/

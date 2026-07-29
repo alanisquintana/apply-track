@@ -36,6 +36,7 @@
       "icons/icon.ico"
     ],
     "externalBin": ["binaries/backend"],
+    "resources": ["binaries/node_modules/**/*"],
     "windows": {
       "nsis": {
         "installerIcon": "icons/icon.ico",

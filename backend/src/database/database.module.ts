@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Application } from '../applications/application.entity';
 import { homedir } from 'os';
+import { createRequire } from 'node:module';
 
 function getDbPath(): string {
   const env = process.env.DB_PATH;
@@ -16,6 +17,20 @@ function getDbPath(): string {
   return resolve(homedir(), '.local', 'share', 'applytrack', 'applytrack.db');
 }
 
+function resolveNativeModule(): any | undefined {
+  const binaryDir = dirname(process.execPath);
+  const candidates = [
+    resolve(binaryDir, 'node_modules', 'better-sqlite3'),
+    resolve(process.cwd(), 'node_modules', 'better-sqlite3'),
+  ];
+  for (const pkgDir of candidates) {
+    if (existsSync(resolve(pkgDir, 'lib', 'database.js'))) {
+      const req = createRequire(resolve(binaryDir, 'noop.js'));
+      return req(pkgDir);
+    }
+  }
+}
+
 function ensureDir(filePath: string) {
   const dir = dirname(filePath);
   if (!existsSync(dir)) {
@@ -25,6 +40,7 @@ function ensureDir(filePath: string) {
 
 const dbPath = getDbPath();
 ensureDir(dbPath);
+const nativeDriver = resolveNativeModule();
 
 @Module({
   imports: [
@@ -32,6 +48,7 @@ ensureDir(dbPath);
       useFactory: () => ({
         type: 'better-sqlite3',
         database: dbPath,
+        driver: nativeDriver,
         entities: [Application],
         synchronize: true,
       }),

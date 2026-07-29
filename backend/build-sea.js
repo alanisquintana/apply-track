@@ -1,6 +1,6 @@
 const { execSync } = require('child_process')
-const { copyFileSync, existsSync, mkdirSync } = require('fs')
-const { resolve } = require('path')
+const { copyFileSync, cpSync, existsSync, mkdirSync, rmSync } = require('fs')
+const { resolve, join } = require('path')
 
 const root = resolve(__dirname, '..')
 const backendDir = __dirname
@@ -63,4 +63,26 @@ try {
   )
 }
 
-console.log(`Backend executable created at: ${outPath}`)
+// 5. Copy native modules for better-sqlite3
+// The SEA binary bundles JS but native .node files must be available at runtime
+console.log('Copying native modules...')
+const targetNodeModules = resolve(srcTauriBin, 'node_modules')
+rmSync(targetNodeModules, { recursive: true, force: true })
+mkdirSync(targetNodeModules, { recursive: true })
+
+function copyModule(name) {
+  const src = resolve(backendDir, 'node_modules', name)
+  const dest = resolve(targetNodeModules, name)
+  if (existsSync(src)) {
+    cpSync(src, dest, { recursive: true, force: true })
+    console.log(`  ✓ ${name}`)
+  } else {
+    console.warn(`  ⚠ ${name} not found`)
+  }
+}
+
+copyModule('better-sqlite3')
+copyModule('bindings')
+copyModule('file-uri-to-path')
+
+console.log(`\nBackend executable created at: ${outPath}`)
