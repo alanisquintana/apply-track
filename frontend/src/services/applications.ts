@@ -16,8 +16,20 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   return res.json()
 }
 
+async function requestWithRetry<T>(url: string, options?: RequestInit, retries = 8): Promise<T> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await request<T>(url, options)
+    } catch (e) {
+      if (i === retries - 1) throw e
+      await new Promise(r => setTimeout(r, 400 * (i + 1)))
+    }
+  }
+  throw new Error('Request failed after retries')
+}
+
 export function getAll(): Promise<Application[]> {
-  return request<Application[]>(BASE)
+  return requestWithRetry<Application[]>(BASE)
 }
 
 export function getById(id: string): Promise<Application> {

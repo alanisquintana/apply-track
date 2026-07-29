@@ -1,6 +1,13 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
-config({ path: resolve(__dirname, '../../.env') });
+import { existsSync } from 'fs';
+
+const envPath = resolve(__dirname, '../../.env');
+if (existsSync(envPath)) {
+  config({ path: envPath });
+} else {
+  config();
+}
 
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
