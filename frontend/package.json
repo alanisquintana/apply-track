@@ -26,6 +26,11 @@
     "react-quill-new": "^3.8.3",
     "react-router-dom": "^7.18.1"
   },
+  "overrides": {
+    "@emnapi/core": "1.11.1",
+    "@emnapi/runtime": "1.11.1",
+    "@emnapi/wasi-threads": "1.2.2"
+  },
   "devDependencies": {
     "@tauri-apps/cli": "^2.11.4",
     "@types/node": "^24.13.2",
