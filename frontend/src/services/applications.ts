@@ -37,19 +37,19 @@ export function getById(id: string): Promise<Application> {
 }
 
 export function create(data: CreateApplicationPayload): Promise<Application> {
-  return request<Application>(BASE, {
+  return requestWithRetry<Application>(BASE, {
     method: 'POST',
     body: JSON.stringify(data),
-  })
+  }, 5)
 }
 
 export function update(id: string, data: UpdateApplicationPayload): Promise<Application> {
-  return request<Application>(`${BASE}/${id}`, {
+  return requestWithRetry<Application>(`${BASE}/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
-  })
+  }, 5)
 }
 
 export function remove(id: string): Promise<void> {
-  return request<void>(`${BASE}/${id}`, { method: 'DELETE' })
+  return requestWithRetry<void>(`${BASE}/${id}`, { method: 'DELETE' }, 5)
 }

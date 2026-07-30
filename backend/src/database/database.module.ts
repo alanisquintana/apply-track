@@ -19,10 +19,15 @@ function getDbPath(): string {
 
 function resolveNativeModule(): any | undefined {
   const binaryDir = dirname(process.execPath);
-  const candidates = [
+  const candidates: string[] = [];
+  const nativePath = process.env.NATIVE_PATH;
+  if (nativePath) {
+    candidates.push(resolve(nativePath, 'better-sqlite3'));
+  }
+  candidates.push(
     resolve(binaryDir, 'node_modules', 'better-sqlite3'),
     resolve(process.cwd(), 'node_modules', 'better-sqlite3'),
-  ];
+  );
   for (const pkgDir of candidates) {
     if (existsSync(resolve(pkgDir, 'lib', 'database.js'))) {
       const req = createRequire(resolve(binaryDir, 'noop.js'));
