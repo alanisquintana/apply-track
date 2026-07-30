@@ -6,6 +6,8 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: windows-latest
 
     steps:
@@ -25,7 +27,7 @@ jobs:
         working-directory: backend
 
       - name: Install frontend dependencies
-        run: npm install
+        run: npm ci
         working-directory: frontend
 
       - name: Setup Rust
@@ -44,7 +46,7 @@ jobs:
         run: node backend/build-sea.js
 
       - name: Build and release
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
