@@ -7,3 +7,4 @@ HANDOFF-*.md
 PLAN.md
 backend/data/
 frontend/src-tauri/binaries/node_modules/
+frontend/src-tauri/binaries/backend-*
