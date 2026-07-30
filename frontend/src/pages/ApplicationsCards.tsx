@@ -167,8 +167,8 @@ export function ApplicationsCards() {
         />
 
         <Stack spacing={0}>
-          <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap" useFlexGap>
-            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+          <Stack direction="row" spacing={1.5} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+            <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>
               <Chip
                 label="All"
                 size="small"
@@ -228,7 +228,7 @@ export function ApplicationsCards() {
             </IconButton>
           </Stack>
 
-          <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+          <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>
           {allWorkModels.map(m => (
             <Chip
               key={m}
@@ -257,7 +257,7 @@ export function ApplicationsCards() {
             sx={{ bgcolor: colors.elevation, borderRadius: 2, cursor: 'pointer', transition: 'box-shadow 0.15s', '&:hover': { boxShadow: `0 0 0 1px ${colors.divider}` } }}
           >
             <CardContent>
-              <Stack direction="row" alignItems="flex-start" sx={{ mb: 0.5 }}>
+              <Stack direction="row" sx={{ mb: 0.5, alignItems: 'flex-start' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                   <Avatar
                     src={app.logoUrl || undefined}
@@ -272,7 +272,7 @@ export function ApplicationsCards() {
                   {dayjs(app.appliedAt).format('DD/MM/YYYY')}
                 </Typography>
               </Stack>
-              <Stack direction="row" alignItems="center" spacing={0} sx={{ minWidth: 0, mb: 1 }}>
+              <Stack direction="row" spacing={0} sx={{ minWidth: 0, mb: 1, alignItems: 'center' }}>
                 <Typography variant="body1" sx={{ color: colors.text, fontWeight: 600, lineHeight: 1.4, whiteSpace: 'nowrap' }}>
                   {app.company}
                 </Typography>
@@ -284,7 +284,7 @@ export function ApplicationsCards() {
                 </Typography>
               </Stack>
 
-              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 1 }}>
+              <Stack direction="row" spacing={0.5} sx={{ mb: 1, alignItems: 'center' }}>
                 <Typography variant="body1" sx={{ color: statusDotColors[app.status] ?? colors.muted, fontSize: '0.6rem', lineHeight: 1.4, display: 'flex', alignItems: 'center', userSelect: 'none' }}>
                   ●
                 </Typography>

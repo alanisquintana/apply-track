@@ -1,5 +1,5 @@
 import { createTheme, alpha } from '@mui/material/styles'
-import { getColors, type ThemeColors } from './colors'
+import { getColors } from './colors'
 
 export function createAppTheme(mode: 'light' | 'dark') {
   const colors = getColors(mode)

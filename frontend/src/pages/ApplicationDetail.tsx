@@ -93,7 +93,7 @@ export function ApplicationDetail() {
 
   return (
     <Box>
-      <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+      <Stack direction="row" spacing={1.5} sx={{ mb: 3, alignItems: 'center' }}>
         <IconButton onClick={() => navigate(-1)} sx={{ color: colors.muted }}>
           <ArrowBackIcon />
         </IconButton>
@@ -197,7 +197,7 @@ export function ApplicationDetail() {
         <DialogTitle>Delete application?</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>This action cannot be undone.</Typography>
-          <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 2 }}>
+          <Stack direction="row" spacing={1} sx={{ mt: 2, justifyContent: 'flex-end' }}>
             <Button onClick={() => setDeleteConfirm(false)}>Cancel</Button>
             <Button color="error" variant="contained" onClick={handleDelete}>Delete</Button>
           </Stack>

@@ -22,6 +22,6 @@ export const darkColors = {
 
 export type ThemeColors = typeof lightColors
 
-export function getColors(mode: 'light' | 'dark'): ThemeColors {
+export function getColors(mode: 'light' | 'dark') {
   return mode === 'light' ? lightColors : darkColors
 }

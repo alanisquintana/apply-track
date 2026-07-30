@@ -335,7 +335,7 @@ export function ApplicationForm({ initial, onSave, onCancel }: Props) {
         placeholder="https://linkedin.com/in/recruiter"
       />
 
-      <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 2 }}>
+      <Stack direction="row" spacing={1} sx={{ mt: 2, justifyContent: 'flex-end' }}>
         <Button onClick={onCancel}>Cancel</Button>
         <Button variant="contained" onClick={handleSubmit} disabled={saving}>
           {saving ? 'Saving...' : 'Save'}
