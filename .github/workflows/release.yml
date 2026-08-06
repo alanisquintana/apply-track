@@ -55,5 +55,5 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'ApplyTrack v__VERSION__'
           releaseBody: 'See the assets to download this version.'
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
