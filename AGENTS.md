@@ -2,6 +2,10 @@
 
 The default language for this project is **English**. All user-facing output, code comments, and documentation must be written in English unless explicitly stated otherwise.
 
+## Chat Language (mandatory)
+
+When chatting in the terminal (interactive assistant conversations), always reply in **Brazilian Portuguese (pt-BR)**. Code comments, commit messages, and documentation still follow the section above.
+
 ### RTK (Rust Token Killer) — Mandatory Use
 - RTK is mandatory for all terminal commands, without exception.
 - Always prefix commands with `rtk`: `rtk npm install`, `rtk git status`, `rtk docker ps`, etc.
