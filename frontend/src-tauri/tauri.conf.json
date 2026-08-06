@@ -16,7 +16,11 @@
         "width": 1200,
         "height": 800,
         "resizable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "closable": true,
         "fullscreen": false,
+        "decorations": false,
         "center": true
       }
     ],

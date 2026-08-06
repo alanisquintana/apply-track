@@ -5,7 +5,6 @@ import {
   IconButton, Popover, Stack, Badge,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import TrackChangesIcon from '@mui/icons-material/TrackChanges'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LightModeIcon from '@mui/icons-material/LightMode'
@@ -14,6 +13,7 @@ import { PickerDay } from '@mui/x-date-pickers/PickerDay'
 import dayjs from 'dayjs'
 import { useColors } from '../hooks/useColors'
 import { ApplicationForm } from './ApplicationForm'
+import { TitleBar } from './TitleBar'
 import { useRefresh } from '../hooks/useRefresh'
 import { ThemeModeContext } from '../hooks/ThemeModeContext'
 import * as api from '../services/applications'
@@ -99,14 +99,11 @@ export function Layout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: colors.background }}>
-      <Box component="main" sx={{ flex: 1, p: 4, overflow: 'auto', minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 5 }}>
-          <TrackChangesIcon sx={{ color: colors.primary, fontSize: 20, mr: 1.5 }} />
-          <Typography variant="h6" noWrap sx={{ color: colors.text, fontSize: '1rem', letterSpacing: '-0.02em', fontWeight: 600 }}>
-            ApplyTrack
-          </Typography>
-          <Box sx={{ flex: 1 }} />
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', height: '100vh', overflow: 'hidden', bgcolor: colors.background }}>
+      <TitleBar />
+      <Box component="main" sx={{ flex: 1, overflow: 'auto', minWidth: 0, display: 'flex', justifyContent: 'center' }}>
+        <Box sx={{ width: '100%', maxWidth: 1150, px: 2, py: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', mb: 5 }}>
           <IconButton onClick={toggleTheme} sx={{ color: colors.muted }}>
             {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
@@ -115,6 +112,7 @@ export function Layout({ children }: { children: ReactNode }) {
           </IconButton>
         </Box>
         {children}
+        </Box>
       </Box>
 
       <Popover
