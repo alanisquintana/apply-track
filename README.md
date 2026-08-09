@@ -4,6 +4,8 @@ A **desktop application** to keep track of every job you've applied to — compa
 
 No spreadsheets, no sticky notes. Just a clean local app that runs on your machine.
 
+**Video presentation: https://youtu.be/e3pPjTH9TtI**
+
 ## What can it do?
 
 - Add a job application with company name, status, and date
