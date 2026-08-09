@@ -13,12 +13,9 @@ No spreadsheets, no sticky notes. Just a clean local app that runs on your machi
 
 ## Download
 
-Download the latest installer from the [Releases](https://github.com/alanisquintana/apply-track/releases) page.
+Download the latest installer from the [Releases](https://github.com/alanisquintana/apply-track/releases) page:
 
-Pick **one**:
-
-- `ApplyTrack_x64-setup.exe` — lightweight installer (recommended)
-- `ApplyTrack_x64_en-US.msi` — standard Windows installer
+- `ApplyTrack_x64-setup.exe`
 
 Run it and the app is ready — no dependencies required.
 
